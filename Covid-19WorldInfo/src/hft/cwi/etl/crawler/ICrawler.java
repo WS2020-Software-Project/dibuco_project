@@ -9,7 +9,6 @@ public interface ICrawler {
 	public void startCrawling(URL startURL, Collection<String> keywordsToLookOutFor);
 	public Collection<WebpageData> getAllCrawlerData();
 
-	
 	static boolean isXMLFile(URLConnection urlConnection) {
 		return urlConnection.getContentType().contains("text/xml");
 	}
