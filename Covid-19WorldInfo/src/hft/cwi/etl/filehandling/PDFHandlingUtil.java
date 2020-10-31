@@ -8,7 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 
-public class PDFHandling {
+public class PDFHandlingUtil {
 
 	public static String getRawPDFData(InputStream inputStream) {
 		String text = "";

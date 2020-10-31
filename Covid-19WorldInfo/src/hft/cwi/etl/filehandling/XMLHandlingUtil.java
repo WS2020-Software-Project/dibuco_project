@@ -1,5 +1,5 @@
 package hft.cwi.etl.filehandling;
 
-public class XMLHandling {
+public class XMLHandlingUtil {
  // empty
 }

@@ -11,7 +11,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class HTMLHandling {
+public class HTMLHandlingUtil {
 
 	private static Set<URI> _allHtmlLinks = new HashSet<>();
 

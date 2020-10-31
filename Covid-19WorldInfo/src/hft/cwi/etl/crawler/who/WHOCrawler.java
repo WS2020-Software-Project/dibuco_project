@@ -13,8 +13,8 @@ import java.util.Set;
 import hft.cwi.etl.crawler.Crawler;
 import hft.cwi.etl.crawler.ICrawler;
 import hft.cwi.etl.crawler.WebpageData;
-import hft.cwi.etl.filehandling.HTMLHandling;
-import hft.cwi.etl.filehandling.PDFHandling;
+import hft.cwi.etl.filehandling.HTMLHandlingUtil;
+import hft.cwi.etl.filehandling.PDFHandlingUtil;
 
 public class WHOCrawler extends Crawler implements ICrawler {
 
@@ -33,12 +33,13 @@ public class WHOCrawler extends Crawler implements ICrawler {
 			if (isXMLFile(urlConnection)) {
 				
 			} else if (isHTMLFile(urlConnection)) {
-				HTMLHandling.getAllURLFromHTML(startURL.toString()) //
+				HTMLHandlingUtil.getHTMLContent(START_URL);
+				HTMLHandlingUtil.getAllURLFromHTML(startURL.toString()) //
 						.stream() //
 						.forEach(this::collectAllLinks);
 				_allWebpages.forEach(webpages -> System.out.println(webpages.getWebpage().toString()));
 			} else if (isPDFFile(urlConnection)) {
-				System.out.println(PDFHandling.getRawPDFData(startURL.openStream()));
+				System.out.println(PDFHandlingUtil.getRawPDFData(startURL.openStream()));
 			}
 
 		} catch (IOException e) {
