@@ -9,11 +9,11 @@ public class Crawler {
 	}
 	
 	protected boolean isHTMLFile(URLConnection urlConnection) {
-		return urlConnection.getContentType().contains("text/xml");
+		return urlConnection.getContentType().contains("text/html");
 	}
 	
 	protected boolean isPDFFile(URLConnection urlConnection) {
-		return urlConnection.getContentType().contains("text/xml");
+		return urlConnection.getContentType().contains("pdf");
 	}
 	
 }
