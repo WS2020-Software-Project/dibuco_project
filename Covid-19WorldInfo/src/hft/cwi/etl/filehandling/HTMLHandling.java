@@ -15,6 +15,12 @@ public class HTMLHandling {
 
 	private static Set<URI> _allHtmlLinks = new HashSet<>();
 
+	public static String getHTMLContent(String url) {
+		StringBuilder builder = new StringBuilder();
+		collectHTMLRawText(url, builder);
+		return builder.toString();
+	}
+
 	public static Set<URI> getAllURLFromHTML(String url) {
 		try {
 			collectAllURL(Jsoup.connect(url).get());
@@ -28,6 +34,17 @@ public class HTMLHandling {
 		Elements links = document.select("a[href]");
 		for (Element link : links) {
 			_allHtmlLinks.add(new URI(link.absUrl("href")));
+		}
+	}
+	
+	private static void collectHTMLRawText(String url, StringBuilder builder) {
+		try {
+			Elements elements = Jsoup.connect(url).get().getElementsByTag("body");
+			for (Element data : elements) {
+				builder.append(data.text());
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 }
