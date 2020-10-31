@@ -1,27 +1,33 @@
 package hft.cwi.etl.filehandling;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 public class HTMLHandling {
 
-	public static String getRawHTMLData(InputStream inputStream) {
-		StringBuilder builder = new StringBuilder();
-		buildRawHTMLData(builder, inputStream);
-		return builder.toString();
-	}
+	private static Set<URI> _allHtmlLinks = new HashSet<>();
 
-	private static void buildRawHTMLData(StringBuilder builder, InputStream inputStream) {
-		String inputLine;
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))){
-			while ((inputLine = br.readLine()) != null) {
-				builder.append(inputLine + "\n");
-			}
-		} catch (IOException e) {
+	public static Set<URI> getAllURLFromHTML(String url) {
+		try {
+			collectAllURL(Jsoup.connect(url).get());
+		} catch (IOException | URISyntaxException e) {
 			e.printStackTrace();
 		}
+		return _allHtmlLinks;
 	}
 
+	private static void collectAllURL(Document document) throws URISyntaxException {
+		Elements links = document.select("a[href]");
+		for (Element link : links) {
+			_allHtmlLinks.add(new URI(link.absUrl("href")));
+		}
+	}
 }
