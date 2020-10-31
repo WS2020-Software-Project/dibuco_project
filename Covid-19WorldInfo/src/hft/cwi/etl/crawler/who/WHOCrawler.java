@@ -1,21 +1,28 @@
 package hft.cwi.etl.crawler.who;
 
 import java.net.URL;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import hft.cwi.etl.crawler.Crawler;
+import hft.cwi.etl.crawler.WebpageData;
 
 public class WHOCrawler implements Crawler	{
 
+	Collection<WebpageData> _allWebpages = new ArrayList<>();
+
 	@Override
-	public void visitURL(URL url) {
+	public void startCrawling(URL startURL, Collection<String> keywordsToLookOutFor) {
+		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public Map<String, Integer> collectKeywords(String rawData) {
+	public Collection<WebpageData> getAllCrawlerData() {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+
 
 }

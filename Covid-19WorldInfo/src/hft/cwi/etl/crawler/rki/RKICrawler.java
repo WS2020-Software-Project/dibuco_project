@@ -1,20 +1,22 @@
 package hft.cwi.etl.crawler.rki;
 
 import java.net.URL;
+import java.util.Collection;
 import java.util.Map;
 
 import hft.cwi.etl.crawler.Crawler;
+import hft.cwi.etl.crawler.WebpageData;
 
 public class RKICrawler implements Crawler{
 
 	@Override
-	public void visitURL(URL url) {
+	public void startCrawling(URL startURL, Collection<String> keywordsToLookOutFor) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public Map<String, Integer> collectKeywords(String rawData) {
+	public Collection<WebpageData> getAllCrawlerData() {
 		// TODO Auto-generated method stub
 		return null;
 	}
