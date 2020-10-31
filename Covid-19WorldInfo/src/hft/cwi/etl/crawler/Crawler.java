@@ -1,11 +1,11 @@
 package hft.cwi.etl.crawler;
 
 import java.net.URL;
-import java.util.Collection;
+import java.util.Map;
 
 public interface Crawler {
 
 	public void visitURL(URL url);
-	public Collection<String> collectKeywords(String rawData);
+	public Map<String,Integer> collectKeywords(String rawData);
 	
 }
