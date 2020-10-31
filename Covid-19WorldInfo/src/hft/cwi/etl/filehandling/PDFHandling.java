@@ -19,7 +19,7 @@ public class PDFHandling {
 		try {
 			File tempFile = createTemporaryFile();
 			PDDocument document = copyOnlinePDFContentIntoTempFile(inputStream, tempFile);
-			if (!document.isEncrypted()) {
+			if (document.isEncrypted()) {
 				return text;
 			}
 			text = collectRawPDFText(document);
