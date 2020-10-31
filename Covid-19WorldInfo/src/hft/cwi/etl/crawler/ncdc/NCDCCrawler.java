@@ -12,7 +12,6 @@ public class NCDCCrawler extends Crawler implements ICrawler {
 	@Override
 	public void startCrawling(URL startURL, Collection<String> keywordsToLookOutFor) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
