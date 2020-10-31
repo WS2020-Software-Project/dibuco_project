@@ -9,17 +9,15 @@ public class HTMLHandling {
 
 	public static String getRawHTMLData(InputStream inputStream) {
 		StringBuilder builder = new StringBuilder();
-		BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-		buildRawHTMLData(builder, br);
+		buildRawHTMLData(builder, inputStream);
 		return builder.toString();
-
 	}
 
-	private static void buildRawHTMLData(StringBuilder builder, BufferedReader br) {
+	private static void buildRawHTMLData(StringBuilder builder, InputStream inputStream) {
 		String inputLine;
-		try {
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))){
 			while ((inputLine = br.readLine()) != null) {
-				builder.append(inputLine);
+				builder.append(inputLine + "\n");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
