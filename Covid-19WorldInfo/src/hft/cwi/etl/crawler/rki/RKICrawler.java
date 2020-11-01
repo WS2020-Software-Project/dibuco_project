@@ -19,7 +19,8 @@ import hft.cwi.etl.filehandling.PDFHandlingUtil;
 
 public class RKICrawler extends Crawler implements ICrawler{
 	public static final String START_URL = "https://www.rki.de/EN/Service/Sitemap/sitemap";
-	//private static final int MAX_AMOUNTS_OF_URL_TO_VISIT = 1;
+	
+	// private static final int MAX_AMOUNTS_OF_URL_TO_VISIT = 1;
 
 	Collection<WebpageData> _allWebpages = new ArrayList<>();
 
@@ -29,12 +30,8 @@ public class RKICrawler extends Crawler implements ICrawler{
 	public void startCrawling(URL startURL, Collection<String> keywordsToLookOutFor) {
 		try {
 			URLConnection urlConnection = startURL.openConnection();
-			if (isXMLFile(urlConnection)) {
-				
-				_allWebpages.forEach(webpages -> System.out.println(webpages.getWebpage().toString()));
-				
-			} else if (isHTMLFile(urlConnection)) {
-				HTMLHandlingUtil.getHTMLContent(START_URL);
+			if (isHTMLFile(urlConnection)) {
+				System.out.println(HTMLHandlingUtil.getHTMLContent(START_URL));
 				HTMLHandlingUtil.getAllURLFromHTML(startURL.toString()) //
 						.stream() //
 						.forEach(this::collectAllLinks);
@@ -42,8 +39,6 @@ public class RKICrawler extends Crawler implements ICrawler{
 			} else if (isPDFFile(urlConnection)) {
 				System.out.println(PDFHandlingUtil.getRawPDFData(startURL.openStream()));
 			} 
-				
-			
 				
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -59,7 +54,6 @@ public class RKICrawler extends Crawler implements ICrawler{
 
 	@Override
 	public Collection<WebpageData> getAllCrawlerData() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
