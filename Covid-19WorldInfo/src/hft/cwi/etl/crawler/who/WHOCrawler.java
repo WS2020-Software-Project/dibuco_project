@@ -33,7 +33,7 @@ public class WHOCrawler extends Crawler implements ICrawler {
 			if (isXMLFile(urlConnection)) {
 				
 			} else if (isHTMLFile(urlConnection)) {
-				HTMLHandlingUtil.getHTMLContent(START_URL);
+				System.out.println(HTMLHandlingUtil.getHTMLContent(START_URL));
 				HTMLHandlingUtil.getAllURLFromHTML(startURL.toString()) //
 						.stream() //
 						.forEach(this::collectAllLinks);
