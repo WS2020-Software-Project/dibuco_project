@@ -9,7 +9,8 @@ public class Crawler {
 	}
 	
 	protected boolean isHTMLFile(URLConnection urlConnection) {
-		return urlConnection.getContentType().contains("text/html");
+		return urlConnection.getContentType().contains("text/html")
+				|| urlConnection.getContentType().contains("text/plain");
 	}
 	
 	protected boolean isPDFFile(URLConnection urlConnection) {
