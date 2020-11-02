@@ -1,4 +1,4 @@
-package hft.cwi.etl.crawler.who;
+package hft.cwi.etl.crawler;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -10,20 +10,25 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import hft.cwi.etl.crawler.Crawler;
-import hft.cwi.etl.crawler.ICrawler;
-import hft.cwi.etl.crawler.WebpageData;
 import hft.cwi.etl.filehandling.HTMLHandlingUtil;
 import hft.cwi.etl.filehandling.PDFHandlingUtil;
-import hft.cwi.etl.filehandling.XMLHandlingUtil;;
+import hft.cwi.etl.filehandling.XMLHandlingUtil;
 
-public class WHOCrawler extends Crawler implements ICrawler {
-
-	public static final String START_URL = "https://apps.who.int/iris/sitemap";
+public class CrawlerController extends Crawler implements ICrawler{
 
 	private static final int MAX_AMOUNTS_OF_URL_TO_VISIT = 1;
+	
+	private static String _languange = "";
 
 	Collection<WebpageData> _allWebpages = new ArrayList<>();
+	
+	public CrawlerController(String languange) {
+		_languange = languange;
+	}
+
+	public CrawlerController() {
+		// default constructor
+	}
 
 	Set<URI> _alreadyVisitedURL = new HashSet<>();
 
@@ -38,7 +43,7 @@ public class WHOCrawler extends Crawler implements ICrawler {
 				.forEach(this::collectAllLinks);
 				
 			} else if (isHTMLFile(urlConnection)) {
-				System.out.println(HTMLHandlingUtil.getHTMLContent(START_URL));
+				HTMLHandlingUtil.getHTMLContent(startURL.toString());
 				HTMLHandlingUtil.getAllURLFromHTML(startURL.toString()) //
 						.stream() //
 						.forEach(this::collectAllLinks);
@@ -64,5 +69,4 @@ public class WHOCrawler extends Crawler implements ICrawler {
 	public Collection<WebpageData> getAllCrawlerData() {
 		return null;
 	}
-
 }
