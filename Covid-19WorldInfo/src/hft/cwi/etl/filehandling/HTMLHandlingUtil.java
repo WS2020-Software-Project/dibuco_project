@@ -42,6 +42,7 @@ public class HTMLHandlingUtil {
 			Elements elements = Jsoup.connect(url).get().getElementsByTag("body");
 			for (Element data : elements) {
 				builder.append(data.text());
+				System.out.println(data.text());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
