@@ -15,6 +15,7 @@ import hft.cwi.etl.crawler.ICrawler;
 import hft.cwi.etl.crawler.WebpageData;
 import hft.cwi.etl.filehandling.HTMLHandlingUtil;
 import hft.cwi.etl.filehandling.PDFHandlingUtil;
+import hft.cwi.etl.filehandling.XMLHandlingUtil;;
 
 public class WHOCrawler extends Crawler implements ICrawler {
 
@@ -29,8 +30,12 @@ public class WHOCrawler extends Crawler implements ICrawler {
 	@Override
 	public void startCrawling(URL startURL, Collection<String> keywordsToLookOutFor) {
 		try {
+			
 			URLConnection urlConnection = startURL.openConnection();
 			if (isXMLFile(urlConnection)) {
+				XMLHandlingUtil.getAllURLFromXML(startURL.toString()) //
+				.stream() //
+				.forEach(this::collectAllLinks);
 				
 			} else if (isHTMLFile(urlConnection)) {
 				System.out.println(HTMLHandlingUtil.getHTMLContent(START_URL));
