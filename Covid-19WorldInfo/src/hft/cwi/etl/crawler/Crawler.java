@@ -5,7 +5,8 @@ import java.net.URLConnection;
 public class Crawler {
 
 	protected boolean isXMLFile(URLConnection urlConnection) {
-		return urlConnection.getContentType().contains("text/xml");
+		return urlConnection.getContentType().contains("text/xml") ||
+				urlConnection.getURL().toString().contains(".xml");
 	}
 	
 	protected boolean isHTMLFile(URLConnection urlConnection) {
