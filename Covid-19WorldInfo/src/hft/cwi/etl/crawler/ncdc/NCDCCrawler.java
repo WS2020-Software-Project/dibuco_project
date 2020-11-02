@@ -29,9 +29,7 @@ public class NCDCCrawler extends Crawler implements ICrawler {
 	public void startCrawling(URL startURL, Collection<String> keywordsToLookOutFor) {
 		try {
 			URLConnection urlConnection = startURL.openConnection();
-			if (isXMLFile(urlConnection)) {
-				
-			} else if (isHTMLFile(urlConnection)) {
+			if (isHTMLFile(urlConnection)) {
 				HTMLHandlingUtil.getHTMLContent(START_URL);
 				HTMLHandlingUtil.getAllURLFromHTML(startURL.toString()) //
 						.stream() //
