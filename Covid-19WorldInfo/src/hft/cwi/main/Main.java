@@ -23,7 +23,7 @@ public class Main {
 		RKICrawler rkiCrawler = new RKICrawler();
 		NCDCCrawler ncdcCrawler = new NCDCCrawler();
 		try {
-			System.out.println("Enea was here");
+			System.out.println("Enea was here!!!!");
 //			ncdcCrawler.startCrawling(new URL(_ncdcURL), null);
 //			whoCrawler.startCrawling(new URL(_pdfURL), null);
 //			whoCrawler.startCrawling(new URL( _htmlURL), null);
