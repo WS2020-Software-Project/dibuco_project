@@ -12,14 +12,18 @@ public class Main {
 	private static String _pdfURL = "https://apps.who.int/iris/bitstream/handle/10665/331917/COVID-19-infection-prevention-during-transfer-and-transport-eng.pdf?sequence=1&isAllowed=y";
 
 	private static String _htmlURL = "https://www.who.int";
+	
+	private static String _xmlURL = "https://www.who.int/sitemaps/sitemapindex.xml";
 
 	public static void main(String[] args) throws IOException {
 		WHOCrawler whoCrawler = new WHOCrawler();
 		RKICrawler rkiCrawler = new RKICrawler();
 		try {
 			whoCrawler.startCrawling(new URL(_pdfURL), null);
-			whoCrawler.startCrawling(new URL(_htmlURL), null);
-
+			whoCrawler.startCrawling(new URL( _htmlURL), null);
+			//xml crawler over WHO wesite
+			whoCrawler.startCrawling(new URL( _xmlURL), null);
+			
 			rkiCrawler.startCrawling(new URL(RKICrawler.START_URL), null);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
