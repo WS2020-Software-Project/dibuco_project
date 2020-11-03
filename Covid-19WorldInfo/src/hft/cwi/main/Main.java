@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Properties;
 
 import hft.cwi.etl.crawler.CrawlerController;
+import hft.cwi.etl.filehandling.CSVHandlingUtil;
 
 public class Main {
 
@@ -24,9 +25,12 @@ public class Main {
 			startEntryWebpages.stream() //
 					.map(Main::createURLFromString) //
 					.forEach(startUrl -> crawler.startCrawling(startUrl, null));
+			
+			CSVHandlingUtil.writeCSVFile(crawler.getAllCrawlerData());
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
+		
 	}
 
 	public static URL createURLFromString(String urlAsString) {
