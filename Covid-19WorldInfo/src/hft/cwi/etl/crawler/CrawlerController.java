@@ -3,6 +3,7 @@ package hft.cwi.etl.crawler;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -40,16 +41,18 @@ public class CrawlerController extends Crawler implements ICrawler{
 			if (isXMLFile(urlConnection)) {
 				XMLHandlingUtil.getAllURLFromXML(startURL.toString()) //
 				.stream() //
-				.forEach(this::collectAllLinks);
+				.forEach(url -> collectAllLinks(url,null));
 				
 			} else if (isHTMLFile(urlConnection)) {
+				// loop check html content
 				HTMLHandlingUtil.getHTMLContent(startURL.toString());
 				HTMLHandlingUtil.getAllURLFromHTML(startURL.toString()) //
-						.stream() //
-						.forEach(this::collectAllLinks);
+						.stream()
+						.filter(url -> url != null) //
+						.forEach(url -> collectAllLinks(url,HTMLHandlingUtil.getHTMLContent(url.toString())));
 				_allWebpages.forEach(webpages -> System.out.println(webpages.getWebpage().toString()));
 			} else if (isPDFFile(urlConnection)) {
-				System.out.println(PDFHandlingUtil.getRawPDFData(startURL.openStream()));
+				collectPDFFiles(startURL, urlConnection);
 			}
 
 		} catch (IOException e) {
@@ -57,9 +60,19 @@ public class CrawlerController extends Crawler implements ICrawler{
 		}
 	}
 
-	private void collectAllLinks(URI uri){
+	private void collectPDFFiles(URL startURL, URLConnection urlConnection) throws IOException {
 		try {
-			_allWebpages.add(new WebpageData(uri.toURL()));
+			collectAllLinks(urlConnection.getURL().toURI(), PDFHandlingUtil.getRawPDFData(startURL.openStream()));
+			System.out.println(PDFHandlingUtil.getRawPDFData(startURL.openStream()));
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void collectAllLinks(URI uri, String webPageContent){
+		try {
+			System.out.println(webPageContent);
+			_allWebpages.add(new WebpageData(uri.toURL(), webPageContent));
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -67,6 +80,6 @@ public class CrawlerController extends Crawler implements ICrawler{
 
 	@Override
 	public Collection<WebpageData> getAllCrawlerData() {
-		return null;
+		return _allWebpages;
 	}
 }
