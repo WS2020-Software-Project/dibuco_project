@@ -9,6 +9,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import hft.cwi.etl.filehandling.HTMLHandlingUtil;
@@ -48,7 +49,7 @@ public class CrawlerController extends Crawler implements ICrawler{
 				HTMLHandlingUtil.getHTMLContent(startURL.toString());
 				HTMLHandlingUtil.getAllURLFromHTML(startURL.toString()) //
 						.stream()
-						.filter(url -> url != null) //
+						.filter(Objects::nonNull) //
 						.forEach(url -> collectAllLinks(url,HTMLHandlingUtil.getHTMLContent(url.toString())));
 				_allWebpages.forEach(webpages -> System.out.println(webpages.getWebpage().toString()));
 			} else if (isPDFFile(urlConnection)) {
