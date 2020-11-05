@@ -18,7 +18,7 @@ import hft.cwi.etl.filehandling.XMLHandlingUtil;
 
 public class CrawlerController extends Crawler implements ICrawler{
 
-	private static final int MAX_AMOUNTS_OF_URL_TO_VISIT = 1;
+	private static final int MAX_AMOUNTS_OF_URL_TO_VISIT = 5;
 	
 	private static String _languange = "";
 
@@ -37,13 +37,11 @@ public class CrawlerController extends Crawler implements ICrawler{
 	@Override
 	public void startCrawling(URL startURL, Collection<String> keywordsToLookOutFor) {
 		try {
-			
 			URLConnection urlConnection = startURL.openConnection();
 			if (isXMLFile(urlConnection)) {
 				XMLHandlingUtil.getAllURLFromXML(startURL.toString()) //
 				.stream() //
-				.forEach(url -> collectAllLinks(url,null));
-				
+				.forEach(url -> collectAllLinks(url,"xml file, it doesn't contain any relevant information"));
 			} else if (isHTMLFile(urlConnection)) {
 				// loop check html content
 				HTMLHandlingUtil.getHTMLContent(startURL.toString());
@@ -51,7 +49,6 @@ public class CrawlerController extends Crawler implements ICrawler{
 						.stream()
 						.filter(Objects::nonNull) //
 						.forEach(url -> collectAllLinks(url,HTMLHandlingUtil.getHTMLContent(url.toString())));
-				_allWebpages.forEach(webpages -> System.out.println(webpages.getWebpage().toString()));
 			} else if (isPDFFile(urlConnection)) {
 				collectPDFFiles(startURL, urlConnection);
 			}
@@ -64,7 +61,6 @@ public class CrawlerController extends Crawler implements ICrawler{
 	private void collectPDFFiles(URL startURL, URLConnection urlConnection) throws IOException {
 		try {
 			collectAllLinks(urlConnection.getURL().toURI(), PDFHandlingUtil.getRawPDFData(startURL.openStream()));
-			System.out.println(PDFHandlingUtil.getRawPDFData(startURL.openStream()));
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
@@ -72,7 +68,6 @@ public class CrawlerController extends Crawler implements ICrawler{
 
 	private void collectAllLinks(URI uri, String webPageContent){
 		try {
-			System.out.println(webPageContent);
 			_allWebpages.add(new WebpageData(uri.toURL(), webPageContent));
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
