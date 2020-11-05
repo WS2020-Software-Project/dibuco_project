@@ -43,8 +43,6 @@ public class CrawlerController extends Crawler implements ICrawler{
 				.stream() //
 				.forEach(url -> collectAllLinks(url,"xml file, it doesn't contain any relevant information"));
 			} else if (isHTMLFile(urlConnection)) {
-				// loop check html content
-				HTMLHandlingUtil.getHTMLContent(startURL.toString());
 				HTMLHandlingUtil.getAllURLFromHTML(startURL.toString()) //
 						.stream()
 						.filter(Objects::nonNull) //
