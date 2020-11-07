@@ -20,35 +20,33 @@ public class CrawlerController extends Crawler implements ICrawler{
 
 	private static final int MAX_AMOUNTS_OF_URL_TO_VISIT = 5;
 	
-	private static String _languange = "";
-
 	Collection<WebpageData> _allWebpages = new ArrayList<>();
 	
-	public CrawlerController(String languange) {
-		_languange = languange;
-	}
-
-	public CrawlerController() {
-		// default constructor
+	Set<String> _alreadyVisited = new HashSet<>();
+	
+	URL _startURL;
+	
+	public CrawlerController(URL startURL) {
+		_startURL = startURL;
 	}
 
 	Set<URI> _alreadyVisitedURL = new HashSet<>();
 
 	@Override
-	public void startCrawling(URL startURL, Collection<String> keywordsToLookOutFor) {
+	public void startCrawling(Collection<String> keywordsToLookOutFor) {
 		try {
-			URLConnection urlConnection = startURL.openConnection();
+			URLConnection urlConnection = _startURL.openConnection();
 			if (isXMLFile(urlConnection)) {
-				XMLHandlingUtil.getAllURLFromXML(startURL.toString()) //
+				XMLHandlingUtil.getAllURLFromXML(_startURL.toString()) //
 				.stream() //
 				.forEach(url -> collectAllLinks(url,"xml file, it doesn't contain any relevant information"));
 			} else if (isHTMLFile(urlConnection)) {
-				HTMLHandlingUtil.getAllURLFromHTML(startURL.toString()) //
+				HTMLHandlingUtil.getAllURLFromHTML(_startURL.toString()) //
 						.stream()
 						.filter(Objects::nonNull) //
 						.forEach(url -> collectAllLinks(url,HTMLHandlingUtil.getHTMLContent(url.toString())));
 			} else if (isPDFFile(urlConnection)) {
-				collectPDFFiles(startURL, urlConnection);
+				collectPDFFiles(_startURL, urlConnection);
 			}
 
 		} catch (IOException e) {

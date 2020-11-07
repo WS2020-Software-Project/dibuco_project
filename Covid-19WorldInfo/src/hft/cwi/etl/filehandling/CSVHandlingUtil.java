@@ -17,8 +17,8 @@ public class CSVHandlingUtil {
 	
 	private static final String TEMPORARY_FILE_NAME = "temporaryFile";
 
-	public static void writeCSVFile(Collection<WebpageData> webpageData) {
-		try (FileWriter csvWriter = new FileWriter("new.csv")){
+	public static void writeCSVFile(Collection<WebpageData> webpageData, String csvFileName) {
+		try (FileWriter csvWriter = new FileWriter(csvFileName + ".csv")){
 			createCSVHeaderFile(csvWriter);
 			webpageData.stream() //
 				.forEach(webpage -> createCSVFile(csvWriter, webpage));

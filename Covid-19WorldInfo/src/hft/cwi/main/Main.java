@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import hft.cwi.etl.crawler.CrawlerController;
 import hft.cwi.etl.filehandling.CSVHandlingUtil;
@@ -21,24 +22,42 @@ public class Main {
 			properties.load(inputStream);
 			Collection<String> startEntryWebpages = Arrays
 					.asList(properties.getProperty("crawler.entrypage").split(","));
-			CrawlerController crawler = new CrawlerController();
-			startEntryWebpages.stream() //
-					.map(Main::createURLFromString) //
-					.forEach(startUrl -> crawler.startCrawling(startUrl, null));
 			
-			CSVHandlingUtil.writeCSVFile(crawler.getAllCrawlerData());
+			Collection<URL> allWebsiteEntries = startEntryWebpages.stream() //
+					.map(Main::createURLFromString) //
+					.collect(Collectors.toList());
+					
+			allWebsiteEntries.forEach(startUrl -> {
+						CrawlerController crawler = new CrawlerController(startUrl);
+						crawler.startCrawling(null);
+						CSVHandlingUtil.writeCSVFile(crawler.getAllCrawlerData(),getURLName(startUrl));
+						
+					});
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
 		
 	}
 
-	public static URL createURLFromString(String urlAsString) {
+	private static URL createURLFromString(String urlAsString) {
 		try {
 			return new URL(urlAsString);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 			return null;
+		}
+	}
+	
+	private static String getURLName(URL url) {
+		String urlAsString = url.toString();
+		if(urlAsString.contains("who")) {
+			return "who";
+		} else if(urlAsString.contains("rki")) {
+			return "rki";
+		} else if (urlAsString.contains("ncdc")) {
+			return "ncdc";
+		} else {
+			return "others";
 		}
 	}
 }

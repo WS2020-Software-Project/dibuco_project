@@ -1,11 +1,10 @@
 package hft.cwi.etl.crawler;
 
-import java.net.URL;
 import java.util.Collection;
 
 public interface ICrawler {
 
-	public void startCrawling(URL startURL, Collection<String> keywordsToLookOutFor);
+	public void startCrawling(Collection<String> keywordsToLookOutFor);
 	public Collection<WebpageData> getAllCrawlerData();
 
 }
