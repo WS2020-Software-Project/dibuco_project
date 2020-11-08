@@ -1,77 +1,23 @@
 package hft.cwi.etl.crawler;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
 
-import hft.cwi.etl.filehandling.HTMLHandlingUtil;
-import hft.cwi.etl.filehandling.PDFHandlingUtil;
-import hft.cwi.etl.filehandling.XMLHandlingUtil;
+import hft.cwi.etl.filehandling.CSVHandlingUtil;
 
-public class CrawlerController extends Crawler implements ICrawler{
+public class CrawlerController {
 
-	private static final int MAX_AMOUNTS_OF_URL_TO_VISIT = 5;
+	private ICrawler _crawler;
 	
-	Collection<WebpageData> _allWebpages = new ArrayList<>();
+	public CrawlerController(ICrawler crawler) {
+		_crawler = crawler;
+	}
 	
-	Set<String> _alreadyVisited = new HashSet<>();
+	public void executeCrawler(Collection<String> keywordsToLookOutFor,String csvFileName) {
+		_crawler.startCrawling(keywordsToLookOutFor);
+		CSVHandlingUtil.writeCSVFile(_crawler.getAllCrawlerData(),csvFileName);
+	}
 	
-	URL _startURL;
-	
-	public CrawlerController(URL startURL) {
-		_startURL = startURL;
-	}
-
-	Set<URI> _alreadyVisitedURL = new HashSet<>();
-
-	@Override
-	public void startCrawling(Collection<String> keywordsToLookOutFor) {
-		try {
-			URLConnection urlConnection = _startURL.openConnection();
-			if (isXMLFile(urlConnection)) {
-				XMLHandlingUtil.getAllURLFromXML(_startURL.toString()) //
-				.stream() //
-				.forEach(url -> collectAllLinks(url,"xml file, it doesn't contain any relevant information"));
-			} else if (isHTMLFile(urlConnection)) {
-				HTMLHandlingUtil.getAllURLFromHTML(_startURL.toString()) //
-						.stream()
-						.filter(Objects::nonNull) //
-						.forEach(url -> collectAllLinks(url,HTMLHandlingUtil.getHTMLContent(url.toString())));
-			} else if (isPDFFile(urlConnection)) {
-				collectPDFFiles(_startURL, urlConnection);
-			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void collectPDFFiles(URL startURL, URLConnection urlConnection) throws IOException {
-		try {
-			collectAllLinks(urlConnection.getURL().toURI(), PDFHandlingUtil.getRawPDFData(startURL.openStream()));
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void collectAllLinks(URI uri, String webPageContent){
-		try {
-			_allWebpages.add(new WebpageData(uri.toURL(), webPageContent));
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public Collection<WebpageData> getAllCrawlerData() {
-		return _allWebpages;
+	public void changeCrawlerStrategy(ICrawler crawler) {
+		_crawler = crawler;
 	}
 }
