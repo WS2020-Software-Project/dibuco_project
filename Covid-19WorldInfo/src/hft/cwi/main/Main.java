@@ -1,38 +1,62 @@
 package hft.cwi.main;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Properties;
+import java.util.stream.Collectors;
 
+import hft.cwi.etl.crawler.CrawlerController;
 import hft.cwi.etl.crawler.ncdc.NCDCCrawler;
 import hft.cwi.etl.crawler.rki.RKICrawler;
 import hft.cwi.etl.crawler.who.WHOCrawler;
+import hft.cwi.etl.filehandling.CSVHandlingUtil;
 
 public class Main {
 
-	private static String _pdfURL = "https://apps.who.int/iris/bitstream/handle/10665/331917/COVID-19-infection-prevention-during-transfer-and-transport-eng.pdf?sequence=1&isAllowed=y";
-
-	private static String _htmlURL = "https://www.who.int";
-	
-	private static String _xmlURL = "https://www.who.int/sitemaps/sitemapindex.xml";
-	
-	private static String _ncdcURL = "https://www.ncdc.gov.in";
-
 	public static void main(String[] args) throws IOException {
-		WHOCrawler whoCrawler = new WHOCrawler();
-		RKICrawler rkiCrawler = new RKICrawler();
-		NCDCCrawler ncdcCrawler = new NCDCCrawler();
-		try {
-			System.out.println("Enea was here!!!!");
-//			ncdcCrawler.startCrawling(new URL(_ncdcURL), null);
-//			whoCrawler.startCrawling(new URL(_pdfURL), null);
-//			whoCrawler.startCrawling(new URL( _htmlURL), null);
-//			//xml crawler over WHO wesite
-			whoCrawler.startCrawling(new URL( _xmlURL), null);
+
+		try (InputStream inputStream = new FileInputStream("resources/crawler.properties")) {
+			Properties properties = new Properties();
+			properties.load(inputStream);
+			
+			URL whoStartURL = createURLFromString(properties.getProperty("crawler.entrypage.who"));
+			URL rkiStartURL = createURLFromString(properties.getProperty("crawler.entrypage.rki"));
+			URL ncdcStartURL = createURLFromString(properties.getProperty("crawler.entrypage.ncdc"));
+			
+			int crawlingDeepness = Integer.parseInt(properties.getProperty("crawler.maxpagesvisit"));
+			int timeBufferInMS =  Integer.parseInt(properties.getProperty("crawler.timebuffer"));
+			
+			WHOCrawler whoCrawler = new WHOCrawler(whoStartURL,crawlingDeepness,timeBufferInMS);
+			RKICrawler rkiCrawler = new RKICrawler(rkiStartURL,crawlingDeepness,timeBufferInMS);
+			NCDCCrawler ncdcCrawler = new NCDCCrawler(ncdcStartURL,crawlingDeepness,timeBufferInMS);
+			
+			CrawlerController crawlerController = new CrawlerController(whoCrawler);
+			crawlerController.executeCrawler(null, "who");
+			
+//			crawlerController.changeCrawlerStrategy(rkiCrawler);
+//			crawlerController.executeCrawler(null, "rki");
 //			
-//			rkiCrawler.startCrawling(new URL(RKICrawler.START_URL), null);
+//			crawlerController.changeCrawlerStrategy(rkiCrawler);
+//			crawlerController.executeCrawler(null, "ncdc");
+					
+			
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
 	}
+
+	private static URL createURLFromString(String urlAsString) {
+		try {
+			return new URL(urlAsString);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 }

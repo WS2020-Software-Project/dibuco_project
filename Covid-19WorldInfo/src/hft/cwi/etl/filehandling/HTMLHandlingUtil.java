@@ -40,8 +40,10 @@ public class HTMLHandlingUtil {
 	private static void collectHTMLRawText(String url, StringBuilder builder) {
 		try {
 			Elements elements = Jsoup.connect(url).get().getElementsByTag("body");
+			System.out.println("Print hmtl context");
 			for (Element data : elements) {
 				builder.append(data.text());
+				System.out.println(data.text());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -8,14 +8,20 @@ public class WebpageData {
 
 	private Map<String,Integer> _numberOfKeywords;
 	private URL _webpage;
+	private String _webPageDataContent;
 	
-	public WebpageData(URL webpage) {
+	public WebpageData(URL webpage, String webPageDataContent) {
 		_webpage = webpage;
+		_webPageDataContent = webPageDataContent;
 		_numberOfKeywords = new HashMap<>();
 	}
 	
 	public String getWebpageAsString() {
 		return _webpage.toString();
+	}
+	
+	public String getWebPageContent() {
+		return _webPageDataContent;
 	}
 	
 	public URL getWebpage() {
