@@ -5,20 +5,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 import hft.cwi.etl.crawler.CrawlerController;
 import hft.cwi.etl.crawler.ncdc.NCDCCrawler;
 import hft.cwi.etl.crawler.rki.RKICrawler;
 import hft.cwi.etl.crawler.who.WHOCrawler;
-import hft.cwi.etl.filehandling.CSVHandlingUtil;
 
 public class Main {
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 
 		try (InputStream inputStream = new FileInputStream("resources/crawler.properties")) {
 			Properties properties = new Properties();
@@ -36,16 +32,16 @@ public class Main {
 			NCDCCrawler ncdcCrawler = new NCDCCrawler(ncdcStartURL,crawlingDeepness,timeBufferInMS);
 			
 			CrawlerController crawlerController = new CrawlerController(whoCrawler);
-			crawlerController.executeCrawler(null, "who");
+			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.who"));
 			
 //			crawlerController.changeCrawlerStrategy(rkiCrawler);
-//			crawlerController.executeCrawler(null, "rki");
+//			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.rki"));
 //			
 //			crawlerController.changeCrawlerStrategy(rkiCrawler);
-//			crawlerController.executeCrawler(null, "ncdc");
+//			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.ncdc"));
 					
 			
-		} catch (MalformedURLException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
