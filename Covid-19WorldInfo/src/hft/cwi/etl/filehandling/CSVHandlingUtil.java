@@ -9,8 +9,6 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 
-import org.apache.commons.io.FileUtils;
-
 import hft.cwi.etl.crawler.WebpageData;
 
 public class CSVHandlingUtil {
