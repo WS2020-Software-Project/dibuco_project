@@ -1,5 +1,6 @@
 package hft.cwi.etl.crawler;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,10 +8,10 @@ import java.util.Map;
 public class WebpageData {
 
 	private Map<String,Integer> _numberOfKeywords;
-	private URL _webpage;
+	private URI _webpage;
 	private String _webPageDataContent;
 	
-	public WebpageData(URL webpage, String webPageDataContent) {
+	public WebpageData(URI webpage, String webPageDataContent) {
 		_webpage = webpage;
 		_webPageDataContent = webPageDataContent;
 		_numberOfKeywords = new HashMap<>();
@@ -24,7 +25,7 @@ public class WebpageData {
 		return _webPageDataContent;
 	}
 	
-	public URL getWebpage() {
+	public URI getWebpage() {
 		return _webpage;
 	}
 	

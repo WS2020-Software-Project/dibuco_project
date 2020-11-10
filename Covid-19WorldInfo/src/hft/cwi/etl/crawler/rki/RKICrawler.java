@@ -1,6 +1,6 @@
 package hft.cwi.etl.crawler.rki;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -12,11 +12,11 @@ public class RKICrawler extends Crawler implements ICrawler{
 
 	private static Collection<WebpageData> _allWebpages = new ArrayList<>();
 
-	private URL _startURL;
+	private URI _startURI;
 	
-	public RKICrawler(URL startURL, int crawlingDeepness, int timeBufferInMs) {
+	public RKICrawler(URI startURI, int crawlingDeepness, int timeBufferInMs) {
 		super(crawlingDeepness, timeBufferInMs);
-		_startURL = startURL;
+		_startURI = startURI;
 	}
 
 	@Override

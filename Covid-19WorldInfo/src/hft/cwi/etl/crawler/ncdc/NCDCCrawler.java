@@ -1,5 +1,6 @@
 package hft.cwi.etl.crawler.ncdc;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,11 +13,11 @@ public class NCDCCrawler extends Crawler implements ICrawler{
 	
 	private static Collection<WebpageData> _allWebpages = new ArrayList<>();
 
-	private URL _startURL;
+	private URI _startURI;
 	
-	public NCDCCrawler(URL startURL, int crawlingDeepness, int timeBufferInMs) {
+	public NCDCCrawler(URI startURI, int crawlingDeepness, int timeBufferInMs) {
 		super(crawlingDeepness, timeBufferInMs);
-		_startURL = startURL;
+		_startURI = startURI;
 	}
 
 	@Override

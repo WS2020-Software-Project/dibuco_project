@@ -30,7 +30,7 @@ public class CSVHandlingUtil {
 
 	private static void createCSVFile(FileWriter csvWriter, WebpageData webpage) {
 		try {
-			URLConnection urlConnection = webpage.getWebpage().openConnection();
+			URLConnection urlConnection = webpage.getWebpage().toURL().openConnection();
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		    Date date = new Date(urlConnection.getDate());
 			csvWriter.append(dateFormat.format(date));
@@ -79,11 +79,15 @@ public class CSVHandlingUtil {
 	}
 
 	private static void addDataToCSVFile(String docType, FileWriter csvWriter, WebpageData webpage, File file) throws IOException {
-		URLConnection urlConnection = webpage.getWebpage().openConnection();
+		URLConnection urlConnection = webpage.getWebpage().toURL().openConnection();
 		csvWriter.append(docType);
 		csvWriter.append(",");
 		csvWriter.append(file.getAbsolutePath());
 		csvWriter.append(",");
+		if(webpage.getAllKeywords().isEmpty()) {
+			csvWriter.append("NO_KEYWORDS_FOUND");
+			csvWriter.append(",");
+		}
 		webpage.getAllKeywords().entrySet().forEach(entry -> {
 			try {
 				csvWriter.append(entry.getKey());

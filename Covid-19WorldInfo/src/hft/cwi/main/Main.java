@@ -4,6 +4,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Properties;
 
@@ -20,9 +22,9 @@ public class Main {
 			Properties properties = new Properties();
 			properties.load(inputStream);
 			
-			URL whoStartURL = createURLFromString(properties.getProperty("crawler.entrypage.who"));
-			URL rkiStartURL = createURLFromString(properties.getProperty("crawler.entrypage.rki"));
-			URL ncdcStartURL = createURLFromString(properties.getProperty("crawler.entrypage.ncdc"));
+			URI whoStartURL = createURIFromString(properties.getProperty("crawler.entrypage.who"));
+			URI rkiStartURL = createURIFromString(properties.getProperty("crawler.entrypage.rki"));
+			URI ncdcStartURL = createURIFromString(properties.getProperty("crawler.entrypage.ncdc"));
 			
 			int crawlingDeepness = Integer.parseInt(properties.getProperty("crawler.maxpagesvisit"));
 			int timeBufferInMS =  Integer.parseInt(properties.getProperty("crawler.timebuffer"));
@@ -46,10 +48,10 @@ public class Main {
 		}
 	}
 
-	private static URL createURLFromString(String urlAsString) {
+	private static URI createURIFromString(String urlAsString) {
 		try {
-			return new URL(urlAsString);
-		} catch (MalformedURLException e) {
+			return new URI(urlAsString);
+		} catch (URISyntaxException e) {
 			e.printStackTrace();
 			return null;
 		}

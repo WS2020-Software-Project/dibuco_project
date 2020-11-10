@@ -1,12 +1,10 @@
 package hft.cwi.etl.filehandling;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -15,16 +13,16 @@ public class HTMLHandlingUtil {
 
 	private static Set<URI> _allHtmlLinks = new HashSet<>();
 
-	public static String getHTMLContent(String url) {
+	public static String getHTMLContent(Document document) {
 		StringBuilder builder = new StringBuilder();
-		collectHTMLRawText(url, builder);
+		collectHTMLRawText(document, builder);
 		return builder.toString();
 	}
 
-	public static Set<URI> getAllURLFromHTML(String url) {
+	public static Set<URI> getAllURLFromHTML(Document document) {
 		try {
-			collectAllURL(Jsoup.connect(url).get());
-		} catch (IOException | URISyntaxException e) {
+			collectAllURL(document);
+		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
 		return _allHtmlLinks;
@@ -37,16 +35,12 @@ public class HTMLHandlingUtil {
 		}
 	}
 	
-	private static void collectHTMLRawText(String url, StringBuilder builder) {
-		try {
-			Elements elements = Jsoup.connect(url).get().getElementsByTag("body");
-			System.out.println("Print hmtl context");
+	private static void collectHTMLRawText(Document document, StringBuilder builder) {
+			Elements elements = document.getAllElements();
+			System.out.println("***************************************************************************Print hmtl context***************************************************************");
 			for (Element data : elements) {
 				builder.append(data.text());
 				System.out.println(data.text());
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 }

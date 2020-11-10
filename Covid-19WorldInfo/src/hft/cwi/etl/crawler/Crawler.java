@@ -1,11 +1,8 @@
 package hft.cwi.etl.crawler;
 
-import java.net.URL;
-import java.net.URLConnection;
+import org.jsoup.Connection.Response;
 
 public abstract class Crawler {
-	
-	private static URL _startUrl;
 	
 	private static int _crawlingDeepness;
 	
@@ -16,18 +13,17 @@ public abstract class Crawler {
 		_timeBufferInMs = timeBufferInMs;
 	}
 
-	protected boolean isXMLFile(URLConnection urlConnection) {
-		return urlConnection.getContentType().contains("text/xml") ||
-				urlConnection.getURL().toString().contains(".xml");
+	protected boolean isXMLFile(Response connectionResponse) {
+		return connectionResponse.contentType().contains("text/xml") 
+				|| connectionResponse.contentType().contains(".xml");
+	}
+	protected boolean isHTMLFile(Response connectionResponse) {
+		return connectionResponse.contentType().contains("text/html")
+				|| connectionResponse.contentType().contains("text/plain");
 	}
 	
-	protected boolean isHTMLFile(URLConnection urlConnection) {
-		return urlConnection.getContentType().contains("text/html")
-				|| urlConnection.getContentType().contains("text/plain");
-	}
-	
-	protected boolean isPDFFile(URLConnection urlConnection) {
-		return urlConnection.getContentType().contains("pdf");
+	protected boolean isPDFFile(Response connectionResponse) {
+		return connectionResponse.contentType().contains("pdf");
 	}
 	
 	protected boolean isCrawlingDeepnessReached(int deepness) {
