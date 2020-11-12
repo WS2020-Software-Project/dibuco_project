@@ -43,7 +43,7 @@ public class WHOCrawler extends Crawler implements ICrawler {
 	@Override
 	public void startCrawling(Collection<String> keywordsToLookOutFor) {
 		try {
-			Connection connection = Jsoup.connect(_startURI.toString());
+			Connection connection = Jsoup.connect(_startURI.toString()).maxBodySize(FILE_SIZE_100MB);
 			connection.ignoreContentType(true);
 			Response response = connection.execute();
 			if (response.statusCode() != 200) {
@@ -77,7 +77,7 @@ public class WHOCrawler extends Crawler implements ICrawler {
 	private void collectWebsiteData() {
 		_websiteToVisit.stream().filter(Objects::nonNull).forEach(uri -> {
 			try {
-				Connection connection = Jsoup.connect(_startURI.toString());
+				Connection connection = Jsoup.connect(uri.toString()).maxBodySize(FILE_SIZE_100MB);
 				connection.ignoreContentType(true);
 				Response response = connection.execute();
 				if (response.statusCode() != 200) {
