@@ -14,9 +14,7 @@ public class HTMLHandlingUtil {
 	private static Set<URI> _allHtmlLinks = new HashSet<>();
 
 	public static String getHTMLContent(Document document) {
-		StringBuilder builder = new StringBuilder();
-		collectHTMLRawText(document, builder);
-		return builder.toString();
+		return document.text();
 	}
 
 	public static Set<URI> getAllURLFromHTML(Document document) {
@@ -35,12 +33,5 @@ public class HTMLHandlingUtil {
 		}
 	}
 	
-	private static void collectHTMLRawText(Document document, StringBuilder builder) {
-			Elements elements = document.getAllElements();
-			System.out.println("***************************************************************************Print hmtl context***************************************************************");
-			for (Element data : elements) {
-				builder.append(data.text());
-				System.out.println(data.text());
-			}
-	}
+
 }
