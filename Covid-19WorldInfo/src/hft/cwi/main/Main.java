@@ -36,9 +36,9 @@ public class Main {
 			CrawlerController crawlerController = new CrawlerController(whoCrawler);
 			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.who"));
 			
-//			crawlerController.changeCrawlerStrategy(rkiCrawler);
-//			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.rki"));
-//			
+			crawlerController.changeCrawlerStrategy(rkiCrawler);
+			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.rki"));
+			
 //			crawlerController.changeCrawlerStrategy(rkiCrawler);
 //			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.ncdc"));
 					
