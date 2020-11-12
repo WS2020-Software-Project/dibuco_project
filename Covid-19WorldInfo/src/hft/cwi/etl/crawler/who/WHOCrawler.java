@@ -2,6 +2,7 @@ package hft.cwi.etl.crawler.who;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -55,21 +56,20 @@ public class WHOCrawler extends Crawler implements ICrawler {
 				_websiteToVisit.forEach(uri -> System.out.println(uri.toString()));
 			} else if (isHTMLFile(response)) {
 				Document document = connection.get();
-				Collection<URI> websiteToVisit = HTMLHandlingUtil.getAllURLFromHTML(document)
-						.stream() //
+				Collection<URI> websiteToVisit = HTMLHandlingUtil.getAllURLFromHTML(document).stream() //
 						.filter(uri -> !isForbiddenLink(uri.toString())) //
 						.filter(uri -> isSameWebpage(uri.toString())) //
 						.collect(Collectors.toList());
-				
+
 				_websiteToVisit.addAll(websiteToVisit);
 				_websiteToVisit.forEach(uri -> System.out.println(uri.toString()));
 			} else if (isPDFFile(response)) {
-				_websiteToVisit.add(_startURI);
+				_websiteToVisit.add(response.url().toURI());
 				System.out.println(PDFHandlingUtil.getRawPDFData(response.url().openStream()));
 			}
 
 			collectWebsiteData();
-		} catch (IOException e) {
+		} catch (IOException | URISyntaxException e) {
 			e.printStackTrace();
 		}
 	}
@@ -105,14 +105,14 @@ public class WHOCrawler extends Crawler implements ICrawler {
 	public Collection<WebpageData> getAllCrawlerData() {
 		return _allWebpages;
 	}
-	
+
 	private boolean isForbiddenLink(String uriAsString) {
-		if(_forbiddenURI.stream().anyMatch(uriAsString::contains)) {
+		if (_forbiddenURI.stream().anyMatch(uriAsString::contains)) {
 			System.out.println("remove link " + uriAsString);
 		}
 		return _forbiddenURI.stream().anyMatch(uriAsString::contains);
 	}
-	
+
 	private boolean isSameWebpage(String uriAsString) {
 		return uriAsString.startsWith("https://apps.who.int/");
 	}

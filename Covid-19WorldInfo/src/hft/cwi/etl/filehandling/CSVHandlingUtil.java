@@ -3,6 +3,7 @@ package hft.cwi.etl.filehandling;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -28,7 +29,10 @@ public class CSVHandlingUtil {
 
 	private static void createCSVFile(FileWriter csvWriter, WebpageData webpage) {
 		try {
-			URLConnection urlConnection = webpage.getWebpage().toURL().openConnection();
+			HttpURLConnection urlConnection = (HttpURLConnection) webpage.getWebpage().toURL().openConnection();
+			if(urlConnection.getResponseCode() != 200) {
+				return;
+			}
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		    Date date = new Date(urlConnection.getDate());
 			csvWriter.append(dateFormat.format(date));

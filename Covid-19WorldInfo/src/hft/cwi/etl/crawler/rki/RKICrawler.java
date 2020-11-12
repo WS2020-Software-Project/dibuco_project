@@ -2,6 +2,7 @@ package hft.cwi.etl.crawler.rki;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -60,12 +61,12 @@ public class RKICrawler extends Crawler implements ICrawler {
 				_websiteToVisit.addAll(websiteToVisit);
 				_websiteToVisit.forEach(uri -> System.out.println(uri.toString()));
 			} else if (isPDFFile(response)) {
-				_websiteToVisit.add(_startURI);
+				_websiteToVisit.add(response.url().toURI());
 				System.out.println(PDFHandlingUtil.getRawPDFData(response.url().openStream()));
 			}
 
 			collectWebsiteData();
-		} catch (IOException e) {
+		} catch (IOException | URISyntaxException e) {
 			e.printStackTrace();
 		}
 	}
