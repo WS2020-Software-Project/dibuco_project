@@ -21,13 +21,9 @@ public class XMLHandlingUtil {
 
 	private static Set<URI> _allxmlLinks = new HashSet<>();
 
-	public static Set<URI> getAllURLFromXML(String aUrl) {
-		try {
-			Collection<URI> extractedLinks = collectAllSitemapLocs(Jsoup.connect(aUrl).get());
-			extractedLinks.forEach(XMLHandlingUtil::collectURLFromXML);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+	public static Set<URI> getAllURLFromXML(Document document) {
+		Collection<URI> extractedLinks = collectAllSitemapLocs(document);
+		extractedLinks.forEach(XMLHandlingUtil::collectURLFromXML);
 		return _allxmlLinks;
 	}
 
@@ -51,7 +47,6 @@ public class XMLHandlingUtil {
 		for (Element link : links) {
 			collectLinks(sitemapURIs, link);
 		}
-		sitemapURIs.forEach(uri -> System.out.println(uri.toString()));
 		return sitemapURIs;
 	}
 
@@ -67,7 +62,6 @@ public class XMLHandlingUtil {
 		File siteMapTempFile = createTemporaryFile(".xml.gz");
 		siteMapTempFile.deleteOnExit();
 		URLConnection connection = gzFileURL.toURL().openConnection();
-		System.out.println(connection.getContentType());
 		FileUtils.copyInputStreamToFile(connection.getInputStream(), siteMapTempFile);
 		return siteMapTempFile;
 	}
