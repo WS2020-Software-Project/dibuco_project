@@ -3,10 +3,8 @@ package hft.cwi.main;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Properties;
 
 import hft.cwi.etl.crawler.CrawlerController;
