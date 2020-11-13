@@ -10,11 +10,28 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 
+
+import com.cybozu.labs.langdetect.LangDetectException;
 import hft.cwi.etl.crawler.WebpageData;
+import hft.cwi.etl.languagedetection.LangDetector;
 
 public class CSVHandlingUtil {
 	
 	private static final String TEMPORARY_FILE_NAME = "temporaryFile";
+	
+	
+	
+	static LangDetector ld;
+	static {
+		ld = new LangDetector();
+		try {
+			ld.init("profiles");
+		} catch (LangDetectException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 
 	public static void writeCSVFile(Collection<WebpageData> webpageData, String csvFileName) {
 		try (FileWriter csvWriter = new FileWriter(csvFileName + ".csv")){
@@ -37,19 +54,28 @@ public class CSVHandlingUtil {
 		    Date date = new Date(urlConnection.getDate());
 			csvWriter.append(dateFormat.format(date));
 			csvWriter.append(",");
+			String contentType="";
+			File file = createFile(TEMPORARY_FILE_NAME,".txt", webpage.getWebPageContent());
+			
 			if(isHTMLFile(urlConnection)) {
-				File file = createFile(TEMPORARY_FILE_NAME,".txt", webpage.getWebPageContent());
-				addDataToCSVFile("html",csvWriter, webpage, file);
+				//File file = createFile(TEMPORARY_FILE_NAME,".txt", webpage.getWebPageContent());
+				//addDataToCSVFile("html",csvWriter, webpage, file);
+				contentType="html";
 			} else if(isXMLFile(urlConnection)) {
-				File file = createFile(TEMPORARY_FILE_NAME,".txt",webpage.getWebPageContent());
-				addDataToCSVFile("xml",csvWriter, webpage, file);
+			//	File file = createFile(TEMPORARY_FILE_NAME,".txt",webpage.getWebPageContent());
+			//	addDataToCSVFile("xml",csvWriter, webpage, file);
+				contentType="xml";
 			} else if(isPDFFile(urlConnection)) {
-				File file = createFile(TEMPORARY_FILE_NAME,".txt",webpage.getWebPageContent());
-				addDataToCSVFile("pdf",csvWriter, webpage, file);
+				//File file = createFile(TEMPORARY_FILE_NAME,".txt",webpage.getWebPageContent());
+				//addDataToCSVFile("pdf",csvWriter, webpage, file);
+				contentType="pdf";
 			} else {
-				File file = createFile(TEMPORARY_FILE_NAME,".txt",webpage.getWebPageContent());
-				addDataToCSVFile("other",csvWriter, webpage, file);
+				//File file = createFile(TEMPORARY_FILE_NAME,".txt",webpage.getWebPageContent());
+				//addDataToCSVFile("other",csvWriter, webpage, file);
+				contentType="other";
 			}
+			addDataToCSVFile(contentType,csvWriter, webpage, file);
+			
 			csvWriter.append("\n");
 			System.out.println("append a line to csv");
 		} catch (IOException e) {
@@ -102,7 +128,15 @@ public class CSVHandlingUtil {
 		csvWriter.append(",");
 		csvWriter.append(webpage.getWebpage().toString());
 		csvWriter.append(",");
-		csvWriter.append("en");
+		
+		//add language 
+		try {
+			csvWriter.append(ld.detect(webpage.getWebPageContent().toString()));
+		} catch (LangDetectException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			csvWriter.append("undefined");
+		}
 	}
 
 	private static void createCSVHeaderFile(FileWriter csvWriter) throws IOException {
