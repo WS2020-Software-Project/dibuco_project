@@ -39,8 +39,8 @@ public class Main {
 			crawlerController.changeCrawlerStrategy(rkiCrawler);
 			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.rki"));
 			
-//			crawlerController.changeCrawlerStrategy(rkiCrawler);
-//			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.ncdc"));
+			crawlerController.changeCrawlerStrategy(ncdcCrawler);
+			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.ncdc"));
 					
 			
 		} catch (IOException e) {
