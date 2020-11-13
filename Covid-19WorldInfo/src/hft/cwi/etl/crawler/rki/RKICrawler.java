@@ -3,6 +3,7 @@ package hft.cwi.etl.crawler.rki;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -80,12 +81,13 @@ public class RKICrawler extends Crawler implements ICrawler {
 				if (response.statusCode() != 200) {
 					return;
 				}
-				if (isHTMLFile(response)) {
+				if (isXMLFile(response)) {
+					collectAllLinks(uri, "xml file, no content available",XML,response.url().openConnection());
+				} else if (isHTMLFile(response)) {
 					Document document = connection.get();
-					System.out.println(uri.toString());
-					collectAllLinks(uri, HTMLHandlingUtil.getHTMLContent(document));
+					collectAllLinks(uri, HTMLHandlingUtil.getHTMLContent(document),HTML,response.url().openConnection());
 				} else if (isPDFFile(response)) {
-					collectAllLinks(uri, PDFHandlingUtil.getRawPDFData(response.url().openStream()));
+					collectAllLinks(uri, PDFHandlingUtil.getRawPDFData(response.url().openStream()),PDF,response.url().openConnection());
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -93,8 +95,8 @@ public class RKICrawler extends Crawler implements ICrawler {
 		});
 	}
 
-	private void collectAllLinks(URI uri, String webPageContent) {
-		_allWebpages.add(new WebpageData(uri, webPageContent));
+	private void collectAllLinks(URI uri, String webPageContent, String docType, URLConnection urlConnection) {
+		_allWebpages.add(new WebpageData(uri, webPageContent,docType,urlConnection));
 	}
 
 	@Override

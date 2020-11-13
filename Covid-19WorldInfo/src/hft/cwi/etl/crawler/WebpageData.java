@@ -1,7 +1,10 @@
 package hft.cwi.etl.crawler;
 
 import java.net.URI;
-import java.net.URL;
+import java.net.URLConnection;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,11 +13,18 @@ public class WebpageData {
 	private Map<String,Integer> _numberOfKeywords;
 	private URI _webpage;
 	private String _webPageDataContent;
+	private String _doctype;
+	private String _date;
 	
-	public WebpageData(URI webpage, String webPageDataContent) {
+	public WebpageData(URI webpage, String webPageDataContent,String doctype, URLConnection urlConnection) {
 		_webpage = webpage;
 		_webPageDataContent = webPageDataContent;
 		_numberOfKeywords = new HashMap<>();
+		_doctype = doctype;
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		Date date = new Date(urlConnection.getDate());
+		_date = dateFormat.format(date);
+	
 	}
 	
 	public String getWebpageAsString() {
@@ -27,6 +37,14 @@ public class WebpageData {
 	
 	public URI getWebpage() {
 		return _webpage;
+	}
+	
+	public String getDate() {
+		return _date;
+	}
+	
+	public String getDocType() {
+		return _doctype;
 	}
 	
 	public void addKeyword(String keyword, int amountOfAppearance) {
