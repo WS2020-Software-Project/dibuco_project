@@ -80,9 +80,7 @@ public class RKICrawler extends Crawler implements ICrawler {
 				if (response.statusCode() != 200) {
 					return;
 				}
-				if (isXMLFile(response)) {
-					collectAllLinks(uri, "xml file, no content available");
-				} else if (isHTMLFile(response)) {
+				if (isHTMLFile(response)) {
 					Document document = connection.get();
 					System.out.println(uri.toString());
 					collectAllLinks(uri, HTMLHandlingUtil.getHTMLContent(document));
