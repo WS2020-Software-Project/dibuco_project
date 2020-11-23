@@ -11,6 +11,7 @@ import hft.cwi.etl.crawler.CrawlerController;
 import hft.cwi.etl.crawler.ncdc.NCDCCrawler;
 import hft.cwi.etl.crawler.rki.RKICrawler;
 import hft.cwi.etl.crawler.who.WHOCrawler;
+import hft.cwi.etl.crawler.zusammengegencorona.ZusammengegenCorona;
 
 public class Main {
 
@@ -25,24 +26,26 @@ public class Main {
 			URI ncdcStartURL = createURIFromString(properties.getProperty("crawler.entrypage.ncdc"));
 			////////////////
 			int crawlingDeepness = Integer.parseInt(properties.getProperty("crawler.crawlingDeepness"));
+			URI zusammengegenStartURL = createURIFromString(properties.getProperty("crawler.entrypage.zusammengegen"));
 			int timeBufferInMS =  Integer.parseInt(properties.getProperty("crawler.timebuffer"));
 			
 			WHOCrawler whoCrawler = new WHOCrawler(whoStartURL,crawlingDeepness,timeBufferInMS);
-//			WHOCrawler whoCrawler = new WHOCrawler(whoStartURL,crawlingDeepness,timeBufferInMS);
-//			RKICrawler rkiCrawler = new RKICrawler(rkiStartURL,crawlingDeepness,timeBufferInMS);
 			RKICrawler rkiCrawler = new RKICrawler(rkiStartURL,crawlingDeepness,timeBufferInMS);
-//			NCDCCrawler ncdcCrawler = new NCDCCrawler(ncdcStartURL,crawlingDeepness,timeBufferInMS);
 			NCDCCrawler ncdcCrawler = new NCDCCrawler(ncdcStartURL,crawlingDeepness,timeBufferInMS);
+			ZusammengegenCorona zusammengegenCrawler = new ZusammengegenCorona(zusammengegenStartURL,crawlingDeepness,timeBufferInMS);
+//			
+//			CrawlerController crawlerController = new CrawlerController(whoCrawler);
+//			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.who"));
+//			
+//			crawlerController.changeCrawlerStrategy(rkiCrawler);
+//			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.rki"));
+//			
+//			crawlerController.changeCrawlerStrategy(ncdcCrawler);
+//			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.ncdc"));
+				
 			
-			CrawlerController crawlerController = new CrawlerController(whoCrawler);
-			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.who"));
-			
-			crawlerController.changeCrawlerStrategy(rkiCrawler);
-			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.rki"));
-			
-			crawlerController.changeCrawlerStrategy(ncdcCrawler);
-			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.ncdc"));
-					
+			CrawlerController changeCrawlerStrategy = new CrawlerController(zusammengegenCrawler);
+			changeCrawlerStrategy.executeCrawler(null, properties.getProperty("crawler.csv.zusammengegen"));
 			
 		} catch (IOException e) {
 			e.printStackTrace();
