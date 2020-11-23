@@ -5,18 +5,28 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.jsoup.Connection;
 import org.jsoup.Connection.Response;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
+import hft.cwi.etl.filehandling.HTMLHandlingUtil;
+import hft.cwi.etl.filehandling.XMLHandlingUtil;
 
 public abstract class Crawler {
 
-	private static int _crawlingDeepness;
+	// remove static 
+	private int _crawlingDeepness;
 
-	private static int _timeBufferInMs;
+	private int _timeBufferInMs;
 
 	protected static final String XML = "xml";
 	protected static final String HTML = "html";
@@ -43,7 +53,7 @@ public abstract class Crawler {
 	}
 
 	protected boolean isCrawlingDeepnessReached(int deepness) {
-		return _crawlingDeepness <= deepness;
+		return deepness <= _crawlingDeepness;
 	}
 
 	protected void delayCrawler() {
@@ -75,5 +85,58 @@ public abstract class Crawler {
 		}
 	
 	}
+	
+	protected Set<URI> collectWebsiteURIs(final List<CrawlerSeed> aSeedList) {
+		final Set<URI> websiteToVisit = new HashSet<>();
+		try {
+			if (aSeedList.size() == 0)
+				return websiteToVisit;
+			final CrawlerSeed currSeed = aSeedList.get(0);
+			final int nextCrawlingLevel = currSeed.getLevel() + 1;
+			aSeedList.remove(currSeed);
 
+			final Connection connection = Jsoup.connect(currSeed.getUri().toString()).maxBodySize(0);
+
+			connection.ignoreContentType(true);
+			Response response = connection.execute();
+			if (response.statusCode() != 200) {
+				return websiteToVisit;
+			}
+			Document document = connection.get();
+
+			if (isXMLFile(response)) {
+				websiteToVisit.addAll(XMLHandlingUtil.getAllURLFromXML(document).stream()
+						.filter(uri -> !isForbiddenLink(uri.toString()))
+						.filter(uri -> isSameWebpage(uri.toString()))
+						.collect(Collectors.toSet()));
+				if (isCrawlingDeepnessReached(nextCrawlingLevel)) {
+					aSeedList.addAll(0, websiteToVisit.stream().map(uri -> new CrawlerSeed(uri, nextCrawlingLevel))
+							.collect(Collectors.toList()));
+				}				
+			} else if (isHTMLFile(response)) {
+				websiteToVisit.addAll(HTMLHandlingUtil.getAllURLFromHTML(document).stream()
+						.filter(uri -> !isForbiddenLink(uri.toString()))
+						.filter(uri -> isSameWebpage(uri.toString()))
+						.collect(Collectors.toSet()));
+				if (isCrawlingDeepnessReached(nextCrawlingLevel)) {
+					aSeedList.addAll(0, websiteToVisit.stream().map(uri -> new CrawlerSeed(uri, nextCrawlingLevel))
+							.collect(Collectors.toList()));
+				}
+				
+			}
+			websiteToVisit.forEach(uri -> System.out.println(uri.toString()));
+						
+			websiteToVisit.addAll(collectWebsiteURIs(aSeedList));
+			return websiteToVisit;
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			return websiteToVisit;
+		}
+	}
+	
+	// added as abstract functions
+	protected abstract boolean isForbiddenLink(String uriAsString);
+	
+	protected abstract boolean isSameWebpage(String uriAsString);
 }

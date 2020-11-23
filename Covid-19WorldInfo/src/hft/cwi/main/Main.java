@@ -23,12 +23,15 @@ public class Main {
 			URI whoStartURL = createURIFromString(properties.getProperty("crawler.entrypage.who"));
 			URI rkiStartURL = createURIFromString(properties.getProperty("crawler.entrypage.rki"));
 			URI ncdcStartURL = createURIFromString(properties.getProperty("crawler.entrypage.ncdc"));
-			
-			int crawlingDeepness = Integer.parseInt(properties.getProperty("crawler.maxpagesvisit"));
+			////////////////
+			int crawlingDeepness = Integer.parseInt(properties.getProperty("crawler.crawlingDeepness"));
 			int timeBufferInMS =  Integer.parseInt(properties.getProperty("crawler.timebuffer"));
 			
 			WHOCrawler whoCrawler = new WHOCrawler(whoStartURL,crawlingDeepness,timeBufferInMS);
+//			WHOCrawler whoCrawler = new WHOCrawler(whoStartURL,crawlingDeepness,timeBufferInMS);
+//			RKICrawler rkiCrawler = new RKICrawler(rkiStartURL,crawlingDeepness,timeBufferInMS);
 			RKICrawler rkiCrawler = new RKICrawler(rkiStartURL,crawlingDeepness,timeBufferInMS);
+//			NCDCCrawler ncdcCrawler = new NCDCCrawler(ncdcStartURL,crawlingDeepness,timeBufferInMS);
 			NCDCCrawler ncdcCrawler = new NCDCCrawler(ncdcStartURL,crawlingDeepness,timeBufferInMS);
 			
 			CrawlerController crawlerController = new CrawlerController(whoCrawler);

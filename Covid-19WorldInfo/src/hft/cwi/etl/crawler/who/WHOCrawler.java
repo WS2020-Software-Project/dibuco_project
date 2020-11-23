@@ -2,14 +2,13 @@ package hft.cwi.etl.crawler.who;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.jsoup.Connection;
 import org.jsoup.Connection.Response;
@@ -18,11 +17,11 @@ import org.jsoup.nodes.Document;
 
 import hft.cwi.etl.crawler.Crawler;
 import hft.cwi.etl.crawler.CrawlerPropertiesFilesReader;
+import hft.cwi.etl.crawler.CrawlerSeed;
 import hft.cwi.etl.crawler.ICrawler;
 import hft.cwi.etl.crawler.WebpageData;
 import hft.cwi.etl.filehandling.HTMLHandlingUtil;
 import hft.cwi.etl.filehandling.PDFHandlingUtil;
-import hft.cwi.etl.filehandling.XMLHandlingUtil;
 
 public class WHOCrawler extends Crawler implements ICrawler {
 
@@ -33,8 +32,6 @@ public class WHOCrawler extends Crawler implements ICrawler {
 
 	private static Set<URI> _websiteToVisit = new HashSet<>();
 
-	private static Collection<URI> _websitesVisited = new ArrayList<>();
-
 	private URI _startURI;
 
 	public WHOCrawler(URI startURI, int crawlingDeepness, int timeBufferInMs) {
@@ -44,35 +41,12 @@ public class WHOCrawler extends Crawler implements ICrawler {
 
 	@Override
 	public void startCrawling(Collection<String> keywordsToLookOutFor) {
-		try {
-			Connection connection = Jsoup.connect(_startURI.toString()).maxBodySize(0);
-			connection.ignoreContentType(true);
-			Response response = connection.execute();
-			if (response.statusCode() != 200) {
-				return;
-			}
-			if (isXMLFile(response)) {
-				Document document = connection.get();
-				_websiteToVisit.addAll(XMLHandlingUtil.getAllURLFromXML(document));
-				_websiteToVisit.forEach(uri -> System.out.println(uri.toString()));
-			} else if (isHTMLFile(response)) {
-				Document document = connection.get();
-				Collection<URI> websiteToVisit = HTMLHandlingUtil.getAllURLFromHTML(document).stream() //
-						.filter(uri -> !isForbiddenLink(uri.toString())) //
-						.filter(uri -> isSameWebpage(uri.toString())) //
-						.collect(Collectors.toList());
-
-				_websiteToVisit.addAll(websiteToVisit);
-				_websiteToVisit.forEach(uri -> System.out.println(uri.toString()));
-			} else if (isPDFFile(response)) {
-				_websiteToVisit.add(response.url().toURI());
-				System.out.println(PDFHandlingUtil.getRawPDFData(response.url().openStream()));
-			}
-
-			collectWebsiteData();
-		} catch (IOException | URISyntaxException e) {
-			e.printStackTrace();
-		}
+		System.out.println("start crawling in WHO .....");
+		
+		final List<CrawlerSeed> theSeedList = new ArrayList<>();
+		theSeedList.add(0, new CrawlerSeed(_startURI, 1));
+		_websiteToVisit.addAll(collectWebsiteURIs(theSeedList));
+//		collectWebsiteData();
 	}
 
 	private void collectWebsiteData() {
@@ -85,12 +59,14 @@ public class WHOCrawler extends Crawler implements ICrawler {
 					return;
 				}
 				if (isXMLFile(response)) {
-					collectAllLinks(uri, "xml file, no content available",XML,response.url().openConnection());
+					collectAllLinks(uri, "xml file, no content available", XML, response.url().openConnection());
 				} else if (isHTMLFile(response)) {
 					Document document = connection.get();
-					collectAllLinks(uri, HTMLHandlingUtil.getHTMLContent(document),HTML,response.url().openConnection());
+					collectAllLinks(uri, HTMLHandlingUtil.getHTMLContent(document), HTML,
+							response.url().openConnection());
 				} else if (isPDFFile(response)) {
-					collectAllLinks(uri, PDFHandlingUtil.getRawPDFData(response.url().openStream()),PDF,response.url().openConnection());
+					collectAllLinks(uri, PDFHandlingUtil.getRawPDFData(response.url().openStream()), PDF,
+							response.url().openConnection());
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -99,7 +75,8 @@ public class WHOCrawler extends Crawler implements ICrawler {
 	}
 
 	private void collectAllLinks(URI uri, String webPageContent, String docType, URLConnection urlConnection) {
-		_allWebpages.add(new WebpageData(uri, webPageContent,docType,urlConnection));
+		System.out.println("\n start collecting Weppage data .....\n the content is "+docType);
+		_allWebpages.add(new WebpageData(uri, webPageContent, docType, urlConnection));
 	}
 
 	@Override
@@ -107,14 +84,14 @@ public class WHOCrawler extends Crawler implements ICrawler {
 		return _allWebpages;
 	}
 
-	private boolean isForbiddenLink(String uriAsString) {
+	protected boolean isForbiddenLink(String uriAsString) {
 		if (_forbiddenURI.stream().anyMatch(uriAsString::contains)) {
 			System.out.println("remove link " + uriAsString);
 		}
 		return _forbiddenURI.stream().anyMatch(uriAsString::contains);
 	}
 
-	private boolean isSameWebpage(String uriAsString) {
+	protected boolean isSameWebpage(String uriAsString) {
 		return uriAsString.startsWith("https://apps.who.int/");
 	}
 
