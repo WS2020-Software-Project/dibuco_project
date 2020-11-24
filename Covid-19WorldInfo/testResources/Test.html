@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+ <head> 
+  <title>Load a Document from a File: jsoup Java HTML parser</title> 
+  <meta name="keywords" content="parse, file, load, HTML"> 
+  <meta name="description" content="How to load HTML from a file in Java."> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"> 
+  <link type="text/css" rel="stylesheet" href="/rez/style.css"> 
+  <meta name="twitter:card" content="summary"> 
+  <meta name="twitter:site" content="@jhy"> 
+  <meta name="twitter:title" content="Load a Document from a File"> 
+  <meta name="twitter:description" content="How to load HTML from a file in Java."> 
+  <meta name="twitter:image" content="https://jsoup.org/rez/jsoup%20logo%20twitter.png"> 
+ </head> 
+ <body class="n1-cookbook"> 
+  <div class="wrap"> 
+   <div class="header"> 
+    <div class="nav-sections"> 
+     <ul> 
+      <li class="n1-home"><h4><a href="/">jsoup</a></h4></li> 
+      <li class="n1-news"><a href="/news/">News</a></li> 
+      <li class="n1-bugs"><a href="/bugs">Bugs</a></li> 
+      <li class="n1-discussion"><a href="/discussion">Discussion</a></li> 
+      <li class="n1-download"><a href="/download">Download</a></li> 
+      <li class="n1-api"><a href="/apidocs/">API Reference</a></li> 
+      <li class="n1-cookbook"><a href="/cookbook/">Cookbook</a></li> 
+      <li class="n1-try"><a href="//try.jsoup.org/">Try jsoup</a></li> 
+     </ul> 
+    </div> 
+   </div> 
+   <div class="breadcrumb" itemscope itemtype="http://schema.org/BreadcrumbList"> <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="/" itemscope itemtype="http://schema.org/Thing" itemprop="item"><span itemprop="name">jsoup</span></a> <span class="seperator">&raquo;</span></span> <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="/cookbook/" itemscope itemtype="http://schema.org/Thing" itemprop="item"><span itemprop="name">Cookbook</span></a> <span class="seperator">&raquo;</span></span> <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="/cookbook/input/" itemscope itemtype="http://schema.org/Thing" itemprop="item"><span itemprop="name">Input</span></a> </span> <span class="seperator">&raquo;</span> Load a Document from a File 
+   </div> 
+   <div class="content"> 
+    <div class="col1"> 
+     <div class="recipe"> 
+      <h1>Load a Document from a File</h1> 
+      <h2>Problem</h2> 
+      <p>You have a file on disk that contains HTML, that you'd like to load and parse, and then maybe manipulate or extract data from.</p> 
+      <h2>Solution</h2> 
+      <p>Use the static <code><a href="/apidocs/org/jsoup/Jsoup.html#parse(java.io.File,java.lang.String,java.lang.String)" title="Parse the contents of a file as HTML.">Jsoup.parse(File in, String charsetName, String baseUri)</a></code> method:</p> 
+      <pre><code class="prettyprint">File input = new File("/tmp/input.html");
+Document doc = Jsoup.parse(input, "UTF-8", "http://example.com/");
+</code></pre> 
+      <h2>Description</h2> 
+      <p>The <code><a href="/apidocs/org/jsoup/Jsoup.html#parse(java.io.File,java.lang.String,java.lang.String)" title="Parse the contents of a file as HTML.">parse(File in, String charsetName, String baseUri)</a></code> method loads and parses a HTML file. If an error occurs whilst loading the file, it will throw an <code>IOException</code>, which you should handle appropriately.</p> 
+      <p>The <code>baseUri</code> parameter is used by the parser to resolve relative URLs in the document before a <code>&lt;base href&gt;</code> element is found. If that's not a concern for you, you can pass an empty string instead.</p> 
+      <p>There is a sister method <code><a href="/apidocs/org/jsoup/Jsoup.html#parse(java.io.File,java.lang.String)" title="Parse the contents of a file as HTML.">parse(File in, String charsetName)</a></code> which uses the file's location as the <code>baseUri</code>. This is useful if you are working on a filesystem-local site and the relative links it points to are also on the filesystem.</p> 
+     </div> 
+    </div>
+    <!-- /col1 --> 
+    <div class="col2"> 
+     <div class="toc box"> 
+      <h2><a href="/cookbook"></a>Cookbook contents</h2> 
+      <h3>Introduction</h3> 
+      <ol start="1"> 
+       <li><a href="/cookbook/introduction/parsing-a-document">Parsing and traversing a Document</a></li> 
+      </ol> 
+      <h3>Input</h3> 
+      <ol start="2"> 
+       <li><a href="/cookbook/input/parse-document-from-string">Parse a document from a String</a></li> 
+       <li><a href="/cookbook/input/parse-body-fragment">Parsing a body fragment</a></li> 
+       <li><a href="/cookbook/input/load-document-from-url">Load a Document from a URL</a></li> 
+       <li class="activePage">Load a Document from a File</li> 
+      </ol> 
+      <h3>Extracting data</h3> 
+      <ol start="6"> 
+       <li><a href="/cookbook/extracting-data/dom-navigation">Use DOM methods to navigate a document</a></li> 
+       <li><a href="/cookbook/extracting-data/selector-syntax">Use selector-syntax to find elements</a></li> 
+       <li><a href="/cookbook/extracting-data/attributes-text-html">Extract attributes, text, and HTML from elements</a></li> 
+       <li><a href="/cookbook/extracting-data/working-with-urls">Working with URLs</a></li> 
+       <li><a href="/cookbook/extracting-data/example-list-links">Example program: list links</a></li> 
+      </ol> 
+      <h3>Modifying data</h3> 
+      <ol start="11"> 
+       <li><a href="/cookbook/modifying-data/set-attributes">Set attribute values</a></li> 
+       <li><a href="/cookbook/modifying-data/set-html">Set the HTML of an element</a></li> 
+       <li><a href="/cookbook/modifying-data/set-text">Setting the text content of elements</a></li> 
+      </ol> 
+      <h3>Cleaning HTML</h3> 
+      <ol start="14"> 
+       <li><a href="/cookbook/cleaning-html/whitelist-sanitizer">Sanitize untrusted HTML (to prevent XSS)</a></li> 
+      </ol> 
+     </div> 
+    </div>
+    <!-- /col2 --> 
+   </div>
+   <!-- /content--> 
+   <div class="footer"> <b>jsoup HTML parser</b> &copy; 2009 - 2020 <a href="//jhy.io/" rel="author"><b>Jonathan Hedley</b></a> 
+   </div> 
+  </div>
+  <!-- /wrap --> 
+  <script src="/rez/prettify.js"></script>
+  <script>prettyPrint();</script> 
+  <script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-89734-10', 'auto');
+    ga('send', 'pageview');
+</script> 
+  <script async src="https://www.google-analytics.com/analytics.js"></script>
+ </body>
+</html>
