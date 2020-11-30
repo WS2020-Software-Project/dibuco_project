@@ -47,6 +47,10 @@ public class NCDCCrawler extends Crawler implements ICrawler{
 		final List<CrawlerSeed> theSeedList = new ArrayList<>();
 		theSeedList.add(0, new CrawlerSeed(_startURI, 1));
 		_websiteToVisit.addAll(collectWebsiteURIs(theSeedList));
+		
+		_websiteToVisit.forEach(uri -> System.out.println(uri.toString()));
+		 writeOnFile(_websiteToVisit); 
+		
 //		collectWebsiteData();
 	}
 

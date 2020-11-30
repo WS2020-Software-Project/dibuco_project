@@ -34,14 +34,14 @@ public class Main {
 			NCDCCrawler ncdcCrawler = new NCDCCrawler(ncdcStartURL,crawlingDeepness,timeBufferInMS);
 			ZusammengegenCorona zusammengegenCrawler = new ZusammengegenCorona(zusammengegenStartURL,crawlingDeepness,timeBufferInMS);
 //			
-//			CrawlerController crawlerController = new CrawlerController(whoCrawler);
-//			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.who"));
-//			
-//			crawlerController.changeCrawlerStrategy(rkiCrawler);
-//			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.rki"));
-//			
-//			crawlerController.changeCrawlerStrategy(ncdcCrawler);
-//			crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.ncdc"));
+			CrawlerController crawlerController = new CrawlerController(whoCrawler);
+		crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.who"));
+			
+			crawlerController.changeCrawlerStrategy(rkiCrawler);
+		crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.rki"));
+			
+		crawlerController.changeCrawlerStrategy(ncdcCrawler);
+		crawlerController.executeCrawler(null, properties.getProperty("crawler.csv.ncdc"));
 				
 			
 			CrawlerController changeCrawlerStrategy = new CrawlerController(zusammengegenCrawler);

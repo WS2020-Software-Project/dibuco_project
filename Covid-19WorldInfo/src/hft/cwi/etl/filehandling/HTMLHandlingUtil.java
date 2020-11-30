@@ -29,7 +29,9 @@ public class HTMLHandlingUtil {
 	private static void collectAllURL(Document document) throws URISyntaxException {
 		Elements links = document.select("a[href]");
 		for (Element link : links) {
-			_allHtmlLinks.add(new URI(link.absUrl("href")));
+			URI newuri=new URI(link.absUrl("href"));
+//			if(!_allHtmlLinks.contains(newuri))				
+			_allHtmlLinks.add(newuri);
 		}
 	}
 	
