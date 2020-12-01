@@ -100,67 +100,74 @@ public abstract class Crawler {
 	
 	}
 	////////////////////NEWCode-> read links from file ////////////////////
-//	protected void readURISFromFile() {
-//		final  Set<URI> _URISFromFile = new HashSet<>();
-//		String  uri;
-//		int counter=0;
-//		try (InputStream inFile = new FileInputStream("alllinksFile.txt")) {
-//			BufferedReader br = new BufferedReader(new InputStreamReader(inFile));
-//			 while ((uri = br.readLine()) != null) {
-//				
-//				if( counter<_maxChunkSize)
-//				{ _URISFromFile.add(new URI(uri));
-//					counter++;
-//				}
-//				else {
-//					System.out.println("\n collecting data .....\n  "+counter);
-//					
-//					collectAllWebsitesData(_URISFromFile);
-//					counter=0;
-//					_URISFromFile.clear();
-//				}
-//				 
-//				 
-//			 }
-//			 br.close();
-//					
-//			} catch (IOException | URISyntaxException e) {
-//				e.printStackTrace();
-//				
-//			}
-//				
-//	}
-//	/////////////
-//	private void collectAllWebsitesData(Set<URI> _websiteToVisit) {
-//		_websiteToVisit.stream().filter(Objects::nonNull).forEach(uri -> {
-//			try {
-//				Connection connection = Jsoup.connect(uri.toString()).maxBodySize(0);
-//				connection.ignoreContentType(true);
-//				Response response = connection.execute();
-//				if (response.statusCode() != 200) {
-//					return;
-//				}
-//				if (isXMLFile(response)) {
-//					collectAllLinks(uri, "xml file, no content available", XML, response.url().openConnection());
-//				} else if (isHTMLFile(response)) {
-//					Document document = connection.get();
-//					collectAllLinks(uri, HTMLHandlingUtil.getHTMLContent(document), HTML,
-//							response.url().openConnection());
-//				} else if (isPDFFile(response)) {
-//					collectAllLinks(uri, PDFHandlingUtil.getRawPDFData(response.url().openStream()), PDF,
-//							response.url().openConnection());
-//				}
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//		});
-//	}
-//	/////////
-//	private static Collection<WebpageData> _allWebpages = new ArrayList<>();
-//	private void collectAllLinks(URI uri, String webPageContent, String docType, URLConnection urlConnection) {
-//		System.out.println("\n start collecting Weppage data .....\n the content is "+docType);
-//		_allWebpages.add(new WebpageData(uri, webPageContent, docType, urlConnection));
-//	}
+	protected void readURISFromFile() {
+		final  Set<URI> _URISFromFile = new HashSet<>();
+		String  uri;
+		int counter=1;
+		try (InputStream inFile = new FileInputStream("alllinksFile.txt")) {
+			BufferedReader br = new BufferedReader(new InputStreamReader(inFile));
+			 while ((uri = br.readLine()) != null) {
+				
+				if( counter<_maxChunkSize)
+				{ _URISFromFile.add(new URI(uri));
+					counter++;
+				}
+				else {
+					 _URISFromFile.add(new URI(uri));
+					System.out.println("\n collecting data .....\n  "+counter);
+					collectAllWebsitesData(_URISFromFile);
+					
+					counter=1;
+					_URISFromFile.clear();
+				}
+				 
+				 
+			 }
+			 
+			 System.out.println("\n collecting data .....\n  "+counter);
+				if(!_URISFromFile.isEmpty()) {
+					collectAllWebsitesData(_URISFromFile);
+					counter=0;
+					_URISFromFile.clear();
+				}
+				
+			 
+			 br.close();
+					
+			} catch (IOException | URISyntaxException e) {
+				e.printStackTrace();
+				
+			}
+				
+	}
+	/////////////
+	private void collectAllWebsitesData(Set<URI> allLinks) {
+		allLinks.stream().filter(Objects::nonNull).forEach(uri -> {
+			try {
+				Connection connection = Jsoup.connect(uri.toString()).maxBodySize(0);
+				connection.ignoreContentType(true);
+				Response response = connection.execute();
+				if (response.statusCode() != 200) {
+					return;
+				}
+				if (isXMLFile(response)) {
+					collectAllLinks(uri, "xml file, no content available", XML, response.url().openConnection());
+				} else if (isHTMLFile(response)) {
+					Document document = connection.get();
+					collectAllLinks(uri, HTMLHandlingUtil.getHTMLContent(document), HTML,
+							response.url().openConnection());
+				} else if (isPDFFile(response)) {
+					collectAllLinks(uri, PDFHandlingUtil.getRawPDFData(response.url().openStream()), PDF,
+							response.url().openConnection());
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
+	}
+	/////////
+	private static Collection<WebpageData> _allWebpages = new ArrayList<>();
+	
 /////////////////////////////////////////////////////////////////////////////////////////////
 	protected Set<URI> collectWebsiteURIs(final List<CrawlerSeed> aSeedList) {
 		final Set<URI> websiteToVisit = new HashSet<>();
@@ -240,4 +247,6 @@ public abstract class Crawler {
 	protected abstract boolean isForbiddenLink(String uriAsString);
 	
 	protected abstract boolean isSameWebpage(String uriAsString);
+	
+	protected abstract void collectAllLinks(URI uri, String webPageContent, String docType, URLConnection urlConnection);
 }

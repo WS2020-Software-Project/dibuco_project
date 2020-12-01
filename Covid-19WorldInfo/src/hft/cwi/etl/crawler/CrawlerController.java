@@ -14,6 +14,7 @@ public class CrawlerController {
 	
 	public void executeCrawler(Collection<String> keywordsToLookOutFor,String csvFileName) {
 		_crawler.startCrawling(keywordsToLookOutFor);
+		
 		CSVHandlingUtil.writeCSVFile(_crawler.getAllCrawlerData(),csvFileName);
 	}
 	

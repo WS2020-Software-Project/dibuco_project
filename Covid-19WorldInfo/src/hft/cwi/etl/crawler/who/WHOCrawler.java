@@ -51,35 +51,10 @@ public class WHOCrawler extends Crawler implements ICrawler {
 		_websiteToVisit.forEach(uri -> System.out.println(uri.toString()));
 		 writeOnFile(_websiteToVisit); 
 //		 readURISFromFile();
-//		collectWebsiteData();
 	}
 
-	private void collectWebsiteData() {
-		_websiteToVisit.stream().filter(Objects::nonNull).forEach(uri -> {
-			try {
-				Connection connection = Jsoup.connect(uri.toString()).maxBodySize(0);
-				connection.ignoreContentType(true);
-				Response response = connection.execute();
-				if (response.statusCode() != 200) {
-					return;
-				}
-				if (isXMLFile(response)) {
-					collectAllLinks(uri, "xml file, no content available", XML, response.url().openConnection());
-				} else if (isHTMLFile(response)) {
-					Document document = connection.get();
-					collectAllLinks(uri, HTMLHandlingUtil.getHTMLContent(document), HTML,
-							response.url().openConnection());
-				} else if (isPDFFile(response)) {
-					collectAllLinks(uri, PDFHandlingUtil.getRawPDFData(response.url().openStream()), PDF,
-							response.url().openConnection());
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		});
-	}
 
-	private void collectAllLinks(URI uri, String webPageContent, String docType, URLConnection urlConnection) {
+	protected void collectAllLinks(URI uri, String webPageContent, String docType, URLConnection urlConnection) {
 		System.out.println("\n start collecting Weppage data .....\n the content is "+docType);
 		_allWebpages.add(new WebpageData(uri, webPageContent, docType, urlConnection));
 	}
