@@ -30,7 +30,7 @@ public class HTMLHandlingUtil {
 	private static void collectAllURL(Document document) throws URISyntaxException {
 		Elements links = document.select("a[href]");
 		for (Element link : links) {
-			String uri = link.absUrl("href").replace(" ", "-");
+			String uri = link.absUrl("href").replace(" ", "-").replace("../", "");
 			if(uri.endsWith("/")) {
 				URI newuri  = new URI(uri.substring(0, uri.length() - 1));
 				_allHtmlLinks.add(newuri);
