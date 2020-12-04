@@ -1,5 +1,6 @@
 package hft.cwi.etl.crawler;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URLConnection;
 import java.text.DateFormat;
@@ -12,6 +13,7 @@ public class WebpageData {
 
 	private Map<String,Integer> _numberOfKeywords;
 	private URI _webpage;
+	private InputStream _inputStream;
 	private String _webPageDataContent;
 	private String _doctype;
 	private String _date;
@@ -24,7 +26,16 @@ public class WebpageData {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		Date date = new Date(urlConnection.getDate());
 		_date = dateFormat.format(date);
+	}
 	
+	public WebpageData(URI webpage, InputStream inputStream,String doctype, URLConnection urlConnection) {
+		_webpage = webpage;
+		_inputStream = inputStream;
+		_numberOfKeywords = new HashMap<>();
+		_doctype = doctype;
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		Date date = new Date(urlConnection.getDate());
+		_date = dateFormat.format(date);
 	}
 	
 	public String getWebpageAsString() {
@@ -33,6 +44,10 @@ public class WebpageData {
 	
 	public String getWebPageContent() {
 		return _webPageDataContent;
+	}
+	
+	public InputStream getInputStream() {
+		return _inputStream;
 	}
 	
 	public URI getWebpage() {
