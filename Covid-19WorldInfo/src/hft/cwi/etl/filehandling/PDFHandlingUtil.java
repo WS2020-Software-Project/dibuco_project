@@ -10,15 +10,21 @@ import org.apache.pdfbox.text.PDFTextStripper;
 
 public class PDFHandlingUtil {
 
-	public static String getRawPDFData(InputStream inputStream) {
-		String text = "";
-		return getPDFFileContent(inputStream, text);
-	}
-
-	private static String getPDFFileContent(InputStream inputStream, String text) {
+	public static File createPDFFile(InputStream inputStream) {
 		try {
 			File tempFile = createTemporaryFile();
-			PDDocument document = copyOnlinePDFContentIntoTempFile(inputStream, tempFile);
+			FileUtils.copyInputStreamToFile(inputStream, tempFile);
+			inputStream.close();
+			return tempFile;
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
+	public static String getPDFFileContent(File file) {
+		String text = "";
+		try {
+			PDDocument document = PDDocument.load(file);
 			if (document.isEncrypted()) {
 				return text;
 			}
@@ -35,12 +41,6 @@ public class PDFHandlingUtil {
 		PDFTextStripper stripper = new PDFTextStripper();
 		text = stripper.getText(document);
 		return text;
-	}
-
-	private static PDDocument copyOnlinePDFContentIntoTempFile(InputStream inputStream, File tempFile)
-			throws IOException {
-		FileUtils.copyInputStreamToFile(inputStream, tempFile);
-		return PDDocument.load(tempFile);
 	}
 
 	private static File createTemporaryFile() throws IOException {
