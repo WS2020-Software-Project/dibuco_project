@@ -74,10 +74,4 @@ public class WebpageData {
 		return _numberOfKeywords;
 	}
 	
-	public void printWebpageData() {
-		System.out.println("The website URL " + _webpage.toString() + " contains the following data");
-		_numberOfKeywords.entrySet().forEach(entry -> {
-			System.out.println("Word " + entry.getKey() + " appeared " + entry.getValue() + " times");
-		});
-	}
 }
