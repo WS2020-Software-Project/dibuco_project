@@ -2,8 +2,6 @@ package hft.cwi.etl.crawler;
 
 import java.util.Collection;
 
-import hft.cwi.etl.filehandling.CSVHandlingUtil;
-
 public class CrawlerController {
 
 	private ICrawler _crawler;
@@ -12,10 +10,8 @@ public class CrawlerController {
 		_crawler = crawler;
 	}
 	
-	public void executeCrawler(Collection<String> keywordsToLookOutFor,String csvFileName) {
+	public void executeCrawler(Collection<String> keywordsToLookOutFor) {
 		_crawler.startCrawling(keywordsToLookOutFor);
-		
-		CSVHandlingUtil.writeCSVFile(_crawler.getAllCrawlerData(),csvFileName);
 	}
 	
 	public void changeCrawlerStrategy(ICrawler crawler) {
