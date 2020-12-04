@@ -14,13 +14,15 @@ public class WebpageData {
 	private Map<String,Integer> _numberOfKeywords;
 	private URI _webpage;
 	private InputStream _inputStream;
+	private String _contentAsText;
 	private String _webPageDataContent;
 	private String _doctype;
 	private String _date;
 	
-	public WebpageData(URI webpage, String webPageDataContent,String doctype, URLConnection urlConnection) {
+	public WebpageData(URI webpage, String webPageDataContent,String contentAsText,String doctype, URLConnection urlConnection) {
 		_webpage = webpage;
 		_webPageDataContent = webPageDataContent;
+		_contentAsText = contentAsText;
 		_numberOfKeywords = new HashMap<>();
 		_doctype = doctype;
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -52,6 +54,10 @@ public class WebpageData {
 	
 	public URI getWebpage() {
 		return _webpage;
+	}
+	
+	public String getWebpageAsText() {
+		return _contentAsText;
 	}
 	
 	public String getDate() {
