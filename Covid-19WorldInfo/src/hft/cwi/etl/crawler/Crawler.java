@@ -3,11 +3,13 @@ package hft.cwi.etl.crawler;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.IOUtils;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
@@ -15,7 +17,6 @@ import org.jsoup.nodes.Document;
 
 import hft.cwi.etl.filehandling.CSVHandlingUtil;
 import hft.cwi.etl.filehandling.HTMLHandlingUtil;
-import hft.cwi.etl.filehandling.PDFHandlingUtil;
 import hft.cwi.etl.filehandling.XMLHandlingUtil;
 
 public abstract class Crawler {
@@ -28,10 +29,8 @@ public abstract class Crawler {
 	
 	private static Set<URI> _alreadyUsedSeed = new HashSet<>();
 	
-	protected static final String XML = "xml";
 	protected static final String HTML = "html";
 	protected static final String PDF = "pdf";
-	protected static final String OTHER = "other";
 
 	public Crawler(int crawlingDeepness, int timeBufferInMs) {
 		_crawlingDeepness = crawlingDeepness;
@@ -87,7 +86,8 @@ public abstract class Crawler {
 			if (response.statusCode() != 200) {
 				return websiteToVisit;
 			}
-			Document document = connection.get();
+			String html = IOUtils.toString(response.url().openStream(), StandardCharsets.UTF_8);
+			Document document = Jsoup.parse(html,response.url().toString());
 			
 			if (isXMLFile(response)) {
 				websiteToVisit.addAll(XMLHandlingUtil.getAllURLFromXML(document).stream()
@@ -105,14 +105,16 @@ public abstract class Crawler {
 						.filter(uri -> !_alreadyVisitedWebsite.contains(uri))
 						.collect(Collectors.toSet()));
 				_alreadyVisitedWebsite.addAll(websiteToVisit);
-				saveFileOnDisk(currSeed.getUri() ,HTMLHandlingUtil.getHTMLContent(document), HTML,response.url().openConnection());
+				WebpageData data = new WebpageData(currSeed.getUri() ,HTMLHandlingUtil.getHTMLContent(document), HTMLHandlingUtil.getHTMLContentAsText(document), HTML,response.url().openConnection());
+				saveFileOnDisk(data);
 				if (isCrawlingDeepnessReached(nextCrawlingLevel)) {
 					aSeedList.addAll(websiteToVisit.stream().map(uri -> new CrawlerSeed(uri, nextCrawlingLevel))
 							.collect(Collectors.toList()));
 				}
 				
 			} else if (isPDFFile(response)) {
-				saveFileOnDisk(currSeed.getUri() ,PDFHandlingUtil.getRawPDFData(response.url().openStream()), PDF,response.url().openConnection());
+				WebpageData data = new WebpageData(currSeed.getUri() ,response.url().openStream(), PDF,response.url().openConnection());
+				saveFileOnDisk(data);
 			}
 			
 			websiteToVisit.addAll(collectWebsiteURIs(aSeedList));
@@ -132,8 +134,7 @@ public abstract class Crawler {
 		}
 	}
 	
-	public void saveFileOnDisk(URI uri, String webPageContent, String docType, URLConnection urlConnection){
-		WebpageData data = new WebpageData(uri, webPageContent, docType, urlConnection);
+	public void saveFileOnDisk(WebpageData data){
 		CSVHandlingUtil.writeCSVFile(data);
 	}
 	
