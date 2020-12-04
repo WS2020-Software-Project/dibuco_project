@@ -42,7 +42,9 @@ public abstract class Crawler {
 	///////
 	private int _maxChunkSize=3;
 	
-	public static Set<URI> _alreadyVisitedWebsites = new HashSet<>();
+	private static Set<URI> _alreadyVisitedWebsite = new HashSet<>();
+	
+	private static Set<URI> _alreadyUsedSeed = new HashSet<>();
 	
 	protected static final String XML = "xml";
 	protected static final String HTML = "html";
@@ -176,18 +178,27 @@ public abstract class Crawler {
 		try {
 			if (aSeedList.size() == 0)
 				return websiteToVisit;
+			
 			final CrawlerSeed currSeed = aSeedList.get(0);
 			final int nextCrawlingLevel = currSeed.getLevel() + 1;
 			aSeedList.remove(currSeed);
-
-			final Connection connection = Jsoup.connect(currSeed.getUri().toString()).maxBodySize(0);
-
-			connection.ignoreContentType(true);
-			Response response = connection.execute();
-			if (response.statusCode() != 200 || _alreadyVisitedWebsites.contains(currSeed.getUri())) {
+			
+			if(_alreadyUsedSeed.contains(currSeed.getUri())) {
+				websiteToVisit.addAll(collectWebsiteURIs(aSeedList));
 				return websiteToVisit;
 			}
-			_alreadyVisitedWebsites.add(currSeed.getUri());
+			_alreadyVisitedWebsite.add(currSeed.getUri());		
+			
+		
+			System.out.println(currSeed.getUri() + " " + currSeed.getLevel());
+			
+			final Connection connection = Jsoup.connect(currSeed.getUri().toString()).maxBodySize(0);
+			
+			connection.ignoreContentType(true);
+			Response response = connection.execute();
+			if (response.statusCode() != 200) {
+				return websiteToVisit;
+			}
 			Document document = connection.get();
 
 			if (isXMLFile(response)) {
@@ -196,32 +207,34 @@ public abstract class Crawler {
 						.filter(uri -> isSameWebpage(uri.toString()))
 						.collect(Collectors.toSet()));
 			
-				if (isCrawlingDeepnessReached(nextCrawlingLevel)) {
-					aSeedList.addAll(0, websiteToVisit.stream().map(uri -> new CrawlerSeed(uri, nextCrawlingLevel))
+				if (isCrawlingDeepnessReached(nextCrawlingLevel) ) {
+					aSeedList.addAll(websiteToVisit.stream().map(uri -> new CrawlerSeed(uri, nextCrawlingLevel))
 							.collect(Collectors.toList()));
 				}				
 			} else if (isHTMLFile(response)) {
 				websiteToVisit.addAll(HTMLHandlingUtil.getAllURLFromHTML(document).stream()
 						.filter(uri -> !isForbiddenLink(uri.toString()))
 						.filter(uri -> isSameWebpage(uri.toString()))
+						.filter(uri -> !_alreadyVisitedWebsite.contains(uri))
 						.collect(Collectors.toSet()));
-			
-				
-				
-				
+				_alreadyVisitedWebsite.addAll(websiteToVisit);
 				if (isCrawlingDeepnessReached(nextCrawlingLevel)) {
-					aSeedList.addAll(0, websiteToVisit.stream().map(uri -> new CrawlerSeed(uri, nextCrawlingLevel))
+					aSeedList.addAll(websiteToVisit.stream().map(uri -> new CrawlerSeed(uri, nextCrawlingLevel))
 							.collect(Collectors.toList()));
 				}
 				
-			}
-									
+			} 
+			
 			websiteToVisit.addAll(collectWebsiteURIs(aSeedList));
 			
 			return websiteToVisit;
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			if(aSeedList.isEmpty()) {
+				return websiteToVisit;
+			}
+			_alreadyVisitedWebsite.add(aSeedList.get(0).getUri());	
+			websiteToVisit.addAll(collectWebsiteURIs(aSeedList));
 			return websiteToVisit;
 		}
 	}
@@ -233,6 +246,7 @@ public abstract class Crawler {
 				try {
 					alllinksWriter.append(uri.toString() + "\n");
 				} catch (IOException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			});
