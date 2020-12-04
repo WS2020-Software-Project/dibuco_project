@@ -15,6 +15,10 @@ public class HTMLHandlingUtil {
 	private static Set<URI> _allHtmlLinks = new HashSet<>();
 
 	public static String getHTMLContent(Document document) {
+		return document.html();
+	}
+	
+	public static String getHTMLContentAsText(Document document) {
 		return document.text();
 	}
 
