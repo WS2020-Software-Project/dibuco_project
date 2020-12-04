@@ -51,6 +51,7 @@ public class NCDCCrawler extends Crawler implements ICrawler{
 		_websiteToVisit.forEach(uri -> System.out.println(uri.toString()));
 		 writeOnFile(_websiteToVisit); 
 		 readURISFromFile();
+		 _alreadyVisitedWebsites.clear();
 	}
 
 

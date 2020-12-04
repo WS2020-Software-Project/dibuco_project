@@ -49,7 +49,8 @@ public class RKICrawler extends Crawler implements ICrawler {
 		
 		_websiteToVisit.forEach(uri -> System.out.println(uri.toString()));
 		 writeOnFile(_websiteToVisit); 
-//		 readURISFromFile();
+		 readURISFromFile();
+		 _alreadyVisitedWebsites.clear();
 	}
 
 	

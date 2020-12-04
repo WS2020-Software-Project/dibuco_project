@@ -42,6 +42,8 @@ public abstract class Crawler {
 	///////
 	private int _maxChunkSize=3;
 	
+	public static Set<URI> _alreadyVisitedWebsites = new HashSet<>();
+	
 	protected static final String XML = "xml";
 	protected static final String HTML = "html";
 	protected static final String PDF = "pdf";
@@ -182,9 +184,10 @@ public abstract class Crawler {
 
 			connection.ignoreContentType(true);
 			Response response = connection.execute();
-			if (response.statusCode() != 200) {
+			if (response.statusCode() != 200 || _alreadyVisitedWebsites.contains(currSeed.getUri())) {
 				return websiteToVisit;
 			}
+			_alreadyVisitedWebsites.add(currSeed.getUri());
 			Document document = connection.get();
 
 			if (isXMLFile(response)) {
@@ -203,6 +206,9 @@ public abstract class Crawler {
 						.filter(uri -> isSameWebpage(uri.toString()))
 						.collect(Collectors.toSet()));
 			
+				
+				
+				
 				if (isCrawlingDeepnessReached(nextCrawlingLevel)) {
 					aSeedList.addAll(0, websiteToVisit.stream().map(uri -> new CrawlerSeed(uri, nextCrawlingLevel))
 							.collect(Collectors.toList()));
@@ -227,7 +233,6 @@ public abstract class Crawler {
 				try {
 					alllinksWriter.append(uri.toString() + "\n");
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			});

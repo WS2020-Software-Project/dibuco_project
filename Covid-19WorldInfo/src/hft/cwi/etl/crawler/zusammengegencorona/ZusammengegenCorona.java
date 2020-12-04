@@ -54,6 +54,7 @@ public class ZusammengegenCorona extends Crawler implements ICrawler {
 		
 		_websiteToVisit.forEach(uri -> System.out.println(uri.toString()));
 		 writeOnFile(_websiteToVisit); 
+		 _alreadyVisitedWebsites.clear();
 		
 	}
 
