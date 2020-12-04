@@ -27,7 +27,7 @@ public class ZusammengegenCorona extends Crawler implements ICrawler {
 		System.out.println("start crawling in ZusammengegenCorona .....");
 		List<CrawlerSeed> theSeedList = new ArrayList<>();
 		theSeedList.add(0, new CrawlerSeed(_startURI, 1));
-		collectWebsiteURIs(theSeedList);
+		collectWebsiteLinksAndData(theSeedList);
 	}
 
 	protected boolean isForbiddenLink(String uriAsString) {

@@ -26,7 +26,7 @@ public class NCDCCrawler extends Crawler implements ICrawler{
 		System.out.println("start crawling in NCDC .....");
 		List<CrawlerSeed> theSeedList = new ArrayList<>();
 		theSeedList.add(0, new CrawlerSeed(_startURI, 1));
-		collectWebsiteURIs(theSeedList);
+		collectWebsiteLinksAndData(theSeedList);
 	}
 
 	protected boolean isForbiddenLink(String uriAsString) {
