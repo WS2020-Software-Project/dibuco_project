@@ -10,7 +10,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class HTMLHandlingUtil {
-
+	
+	
 	private static Set<URI> _allHtmlLinks = new HashSet<>();
 
 	public static String getHTMLContent(Document document) {
@@ -25,15 +26,19 @@ public class HTMLHandlingUtil {
 		}
 		return _allHtmlLinks;
 	}
-
+	
 	private static void collectAllURL(Document document) throws URISyntaxException {
 		Elements links = document.select("a[href]");
 		for (Element link : links) {
-			URI newuri=new URI(link.absUrl("href"));
-//			if(!_allHtmlLinks.contains(newuri))				
-			_allHtmlLinks.add(newuri);
+			String uri = link.absUrl("href").replace(" ", "-");
+			if(uri.endsWith("/")) {
+				URI newuri  = new URI(uri.substring(0, uri.length() - 1));
+				_allHtmlLinks.add(newuri);
+			} else {
+				URI newuri = new URI(uri);
+				_allHtmlLinks.add(newuri);
+			}
+		
 		}
 	}
-	
-
 }
