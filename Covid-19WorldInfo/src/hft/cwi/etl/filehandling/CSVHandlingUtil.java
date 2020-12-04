@@ -14,17 +14,6 @@ public class CSVHandlingUtil {
 	private static final String TEMPORARY_FILE_NAME = "temporaryFile";
 
 	private static LangDetector _ld = new LangDetector("profiles");
-
-	public static void writeCSVFile(Collection<WebpageData> webpageData, String csvFileName) {
-		try (FileWriter csvWriter = new FileWriter(csvFileName + ".csv",true)) {
-			createCSVHeaderFile(csvWriter);
-			webpageData.stream() //
-					.forEach(webpage -> createCSVFile(csvWriter, webpage));
-			csvWriter.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 	
 	public static void writeCSVFile(WebpageData webpageData, String csvFileName) {
 		File file = new File (csvFileName + ".csv");

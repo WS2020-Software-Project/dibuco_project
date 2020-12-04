@@ -16,7 +16,6 @@ class CSVHandlingUtilTest {
 
 	@Test
 	void test() throws IOException, URISyntaxException {
-		Collection<WebpageData> webpageData = new ArrayList<>();
 		URI webpage = new URI("https://www.google.com/");
 		String webPageDataContent = "empty content";
 		String doctype = "html";
@@ -24,8 +23,7 @@ class CSVHandlingUtilTest {
 		
 		
 		WebpageData testobject = new WebpageData(webpage,webPageDataContent,doctype,urlConnection);
-		webpageData.add(testobject);
-		CSVHandlingUtil.writeCSVFile(webpageData, "csvFileTest");
+		CSVHandlingUtil.writeCSVFile(testobject, "csvFileTest");
 		File testFile = new File("csvFileTest.csv");
 		
 		assert(testFile.exists());
