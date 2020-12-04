@@ -14,6 +14,10 @@ public class CSVHandlingUtil {
 	private static final String TEMPORARY_FILE_NAME = "temporaryFile";
 	
 	private static final String CSV_FILE_NAME = "properties.csv";
+	
+	private static final String HTML = "html";
+	
+	private static final String PDF = "pdf";
 
 	private static LangDetector _ld = new LangDetector("profiles");
 	
@@ -29,19 +33,29 @@ public class CSVHandlingUtil {
 			
 		}
 		try (FileWriter csvWriter = new FileWriter(CSV_FILE_NAME,true)) {
-			createCSVFile(csvWriter, webpageData);
+			writeIntoCSVFile(csvWriter, webpageData);
 			csvWriter.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private static void createCSVFile(FileWriter csvWriter, WebpageData webpage) {
+	private static void writeIntoCSVFile(FileWriter csvWriter, WebpageData webpage) {
 		try {
-			csvWriter.append(webpage.getDate());
-			csvWriter.append(",");
-			File file = createFile(TEMPORARY_FILE_NAME, ".txt", webpage.getWebPageContent());
-			addDataToCSVFile(webpage.getDocType(), csvWriter, webpage, file);
+			if(HTML.equals(webpage.getDocType())) {
+				File file = createFile(TEMPORARY_FILE_NAME, ".html", webpage.getWebPageContent());
+				csvWriter.append(webpage.getDate());
+				csvWriter.append(",");
+				addDataToCSVFile(webpage.getDocType(), csvWriter, webpage, file);
+			} else if(PDF.equals(webpage.getDocType())) {
+				File file = PDFHandlingUtil.createPDFFile(webpage.getInputStream());
+				if(file == null) {
+					return;
+				}
+				csvWriter.append(webpage.getDate());
+				csvWriter.append(",");
+				addDataToCSVFile(webpage.getDocType(), csvWriter, webpage, file);
+			}
 			csvWriter.append("\n");
 			System.out.println("append a line to csv");
 		} catch (IOException e) {
@@ -83,7 +97,12 @@ public class CSVHandlingUtil {
 		csvWriter.append(",");
 		csvWriter.append(webpage.getWebpage().toString());
 		csvWriter.append(",");
-		csvWriter.append(_ld.detect(webpage.getWebPageContent()));
+		if(PDF.equals(webpage.getDocType())) {
+			csvWriter.append(_ld.detect(PDFHandlingUtil.getPDFFileContent(file)));
+		} else if(HTML.equals(webpage.getDocType())) {
+			csvWriter.append(_ld.detect(webpage.getWebpageAsText()));
+		}
+		
 	}
 
 	private static void createCSVHeaderFile(FileWriter csvWriter) throws IOException {

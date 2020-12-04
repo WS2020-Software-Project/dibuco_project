@@ -22,7 +22,7 @@ class CSVHandlingUtilTest {
 		URLConnection urlConnection	= webpage.toURL().openConnection();
 		
 		
-		WebpageData testobject = new WebpageData(webpage,webPageDataContent,doctype,urlConnection);
+		WebpageData testobject = new WebpageData(webpage,webPageDataContent,doctype,"",urlConnection);
 		CSVHandlingUtil.writeCSVFile(testobject);
 		File testFile = new File("csvFileTest.csv");
 		
