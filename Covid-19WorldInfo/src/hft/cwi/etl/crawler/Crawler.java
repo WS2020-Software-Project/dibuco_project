@@ -134,7 +134,7 @@ public abstract class Crawler {
 	
 	public void saveFileOnDisk(URI uri, String webPageContent, String docType, URLConnection urlConnection){
 		WebpageData data = new WebpageData(uri, webPageContent, docType, urlConnection);
-		CSVHandlingUtil.writeCSVFile(data,"properties");
+		CSVHandlingUtil.writeCSVFile(data);
 	}
 	
 	protected abstract boolean isForbiddenLink(String uriAsString);

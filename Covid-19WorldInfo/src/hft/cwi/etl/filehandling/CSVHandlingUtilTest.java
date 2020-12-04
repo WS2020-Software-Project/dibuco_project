@@ -23,7 +23,7 @@ class CSVHandlingUtilTest {
 		
 		
 		WebpageData testobject = new WebpageData(webpage,webPageDataContent,doctype,urlConnection);
-		CSVHandlingUtil.writeCSVFile(testobject, "csvFileTest");
+		CSVHandlingUtil.writeCSVFile(testobject);
 		File testFile = new File("csvFileTest.csv");
 		
 		assert(testFile.exists());

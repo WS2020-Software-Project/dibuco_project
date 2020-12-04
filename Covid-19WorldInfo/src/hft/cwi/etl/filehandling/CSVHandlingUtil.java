@@ -12,13 +12,15 @@ import hft.cwi.etl.languagedetection.LangDetector;
 public class CSVHandlingUtil {
 
 	private static final String TEMPORARY_FILE_NAME = "temporaryFile";
+	
+	private static final String CSV_FILE_NAME = "properties.csv";
 
 	private static LangDetector _ld = new LangDetector("profiles");
 	
-	public static void writeCSVFile(WebpageData webpageData, String csvFileName) {
-		File file = new File (csvFileName + ".csv");
+	public static void writeCSVFile(WebpageData webpageData) {
+		File file = new File (CSV_FILE_NAME);
 		if(!file.exists()) {
-			try (FileWriter csvWriter = new FileWriter(csvFileName + ".csv")) {
+			try (FileWriter csvWriter = new FileWriter(CSV_FILE_NAME)) {
 				createCSVHeaderFile(csvWriter);
 				csvWriter.flush();
 			} catch (IOException e) {
@@ -26,7 +28,7 @@ public class CSVHandlingUtil {
 			}
 			
 		}
-		try (FileWriter csvWriter = new FileWriter(csvFileName + ".csv",true)) {
+		try (FileWriter csvWriter = new FileWriter(CSV_FILE_NAME,true)) {
 			createCSVFile(csvWriter, webpageData);
 			csvWriter.flush();
 		} catch (IOException e) {
