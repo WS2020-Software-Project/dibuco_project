@@ -59,6 +59,7 @@ public abstract class Crawler {
 		_alreadyUsedSeed.add(currSeed.getUri());		
 		System.out.println(currSeed.getUri() + " " + currSeed.getLevel());
 		try {
+			delayCrawler();
 			Connection connection = Jsoup.connect(currSeed.getUri().toString()).maxBodySize(0);
 			connection.ignoreContentType(true);
 			Response response = connection.execute();
