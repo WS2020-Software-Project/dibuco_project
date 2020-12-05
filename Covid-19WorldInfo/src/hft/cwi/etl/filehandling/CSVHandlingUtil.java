@@ -52,7 +52,7 @@ public class CSVHandlingUtil {
 				csvWriter.append(",");
 				addDataToCSVFile(webpage.getDocType(), csvWriter, webpage, file);
 			} else if(PDF.equals(webpage.getDocType())) {
-				File file = PDFHandlingUtil.createPDFFile(PATH_TO_MIDDLEWARE_RESOURCE_FOLDER + uuid.toString(),webpage.getInputStream());
+				File file = PDFHandlingUtil.createPDFFile(PATH_TO_MIDDLEWARE_RESOURCE_FOLDER + uuid.toString() + ".pdf",webpage.getInputStream());
 				if(file == null) {
 					return;
 				}

@@ -44,7 +44,7 @@ public class PDFHandlingUtil {
 	}
 
 	private static File createTemporaryFile(String prefix) throws IOException {
-		File tempFile = File.createTempFile(prefix, ".pdf");
+		File tempFile = new File(prefix);
 		tempFile.deleteOnExit();
 		return tempFile;
 	}
