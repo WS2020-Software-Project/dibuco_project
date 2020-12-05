@@ -10,9 +10,9 @@ import org.apache.pdfbox.text.PDFTextStripper;
 
 public class PDFHandlingUtil {
 
-	public static File createPDFFile(InputStream inputStream) {
+	public static File createPDFFile(String prefix, InputStream inputStream) {
 		try {
-			File tempFile = createTemporaryFile();
+			File tempFile = createTemporaryFile(prefix);
 			FileUtils.copyInputStreamToFile(inputStream, tempFile);
 			inputStream.close();
 			return tempFile;
@@ -43,8 +43,8 @@ public class PDFHandlingUtil {
 		return text;
 	}
 
-	private static File createTemporaryFile() throws IOException {
-		File tempFile = File.createTempFile("downloadedFile", ".pdf");
+	private static File createTemporaryFile(String prefix) throws IOException {
+		File tempFile = File.createTempFile(prefix, ".pdf");
 		tempFile.deleteOnExit();
 		return tempFile;
 	}
