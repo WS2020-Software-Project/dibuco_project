@@ -6,7 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import hft.cwi.etl.crawler.WebpageData;
@@ -106,7 +105,6 @@ public class CSVHandlingUtil {
 		} else if(HTML.equals(webpage.getDocType())) {
 			csvWriter.append(_ld.detect(webpage.getWebpageAsText()));
 		}
-		
 	}
 
 	private static void createCSVHeaderFile(FileWriter csvWriter) throws IOException {
