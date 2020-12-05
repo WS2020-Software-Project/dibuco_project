@@ -1,10 +1,13 @@
 package hft.cwi.etl.filehandling;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.URLConnection;
-import java.util.Collection;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import hft.cwi.etl.crawler.WebpageData;
 import hft.cwi.etl.languagedetection.LangDetector;
@@ -66,8 +69,9 @@ public class CSVHandlingUtil {
 	private static File createFile(String prefix, String suffix, String webPageContent) throws IOException {
 		File file = File.createTempFile(prefix, suffix);
 		file.deleteOnExit();
-		try (FileWriter localFileWriter = new FileWriter(file)) {
-			localFileWriter.append(webPageContent);
+		try (FileOutputStream fileStream = new FileOutputStream(file);
+			 OutputStreamWriter writer = new OutputStreamWriter(fileStream,StandardCharsets.UTF_8.newEncoder())) {
+			writer.write(webPageContent);
 		}
 		return file;
 	}
