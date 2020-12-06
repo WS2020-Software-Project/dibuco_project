@@ -22,7 +22,6 @@ public class WHOCrawler extends Crawler implements ICrawler {
 		_startURI = startURI;
 	}
 
-
 	@Override
 	public void startCrawling(Collection<String> keywordsToLookOutFor) {
 		System.out.println("start crawling in WHO .....");
