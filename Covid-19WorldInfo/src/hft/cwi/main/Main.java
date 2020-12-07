@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Properties;
 
 import hft.cwi.etl.crawler.CrawlerController;
@@ -35,17 +38,20 @@ public class Main {
 			ZusammengegenCorona zusammengegenCrawler = new ZusammengegenCorona(zusammengegenStartURL, crawlingDeepness,
 					timeBufferInMS);
 			
+			////////////////////////
+			final Collection<String> _keywordslist = Arrays.asList(properties.getProperty("crawler.keywords").split(","));
+	
 			CrawlerController crawlerController = new CrawlerController(zusammengegenCrawler);
-			crawlerController.executeCrawler(null);
+			crawlerController.executeCrawler(_keywordslist);
 			
-			crawlerController.changeCrawlerStrategy(ncdcCrawler);
-			crawlerController.executeCrawler(null);
-			
-			crawlerController.changeCrawlerStrategy(whoCrawler);
-			crawlerController.executeCrawler(null);
-
-			crawlerController.changeCrawlerStrategy(rkiCrawler);
-			crawlerController.executeCrawler(null);
+//			crawlerController.changeCrawlerStrategy(ncdcCrawler);
+//			crawlerController.executeCrawler(null);
+//			
+//			crawlerController.changeCrawlerStrategy(whoCrawler);
+//			crawlerController.executeCrawler(null);
+//
+//			crawlerController.changeCrawlerStrategy(rkiCrawler);
+//			crawlerController.executeCrawler(null);
 
 		} catch (IOException e) {
 			e.printStackTrace();

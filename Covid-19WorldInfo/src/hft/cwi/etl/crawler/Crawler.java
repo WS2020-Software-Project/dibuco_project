@@ -3,6 +3,8 @@ package hft.cwi.etl.crawler;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +32,10 @@ public abstract class Crawler {
 	
 	protected static final String HTML = "html";
 	protected static final String PDF = "pdf";
+	
+	private static Collection<String> _keywordslist;
+
+	
 
 	public Crawler(int crawlingDeepness, int timeBufferInMs) {
 		_crawlingDeepness = crawlingDeepness;
@@ -112,9 +118,13 @@ public abstract class Crawler {
 		websiteToVisit.addAll(collectWebsiteLinksAndData(aSeedList));
 	}
 
+	@SuppressWarnings("resource")
 	private void handleAndSavePDFDataToDisk(final CrawlerSeed currSeed, Response response) throws IOException {
+///////////////check keywords
+	if( _keywordslist.stream().anyMatch(response.url().openStream().toString()::contains)) {
 		WebpageData data = new WebpageData(currSeed.getUri() ,response.url().openStream(), PDF,response.url().openConnection());
 		saveFileOnDisk(data);
+	}
 	}
 
 	private void handleAndSaveHTMLDataToDisk(final List<CrawlerSeed> aSeedList, final Set<URI> websiteToVisit,
@@ -125,9 +135,13 @@ public abstract class Crawler {
 				.filter(uri -> isSameWebpage(uri.toString()))
 				.filter(uri -> !_alreadyVisitedWebsite.contains(uri))
 				.collect(Collectors.toSet()));
+		
 		_alreadyVisitedWebsite.addAll(websiteToVisit);
+		///////////////check keywords
+		if( _keywordslist.stream().anyMatch(HTMLHandlingUtil.getHTMLContent(document)::contains)) {
 		WebpageData data = new WebpageData(currSeed.getUri() ,HTMLHandlingUtil.getHTMLContent(document), HTMLHandlingUtil.getHTMLContentAsText(document), HTML,response.url().openConnection());
 		saveFileOnDisk(data);
+		}
 		if (isCrawlingDeepnessReached(nextCrawlingLevel)) {
 			aSeedList.addAll(websiteToVisit.stream().map(uri -> new CrawlerSeed(uri, nextCrawlingLevel))
 					.collect(Collectors.toList()));
@@ -172,4 +186,12 @@ public abstract class Crawler {
 		return deepness <= _crawlingDeepness;
 	}
 	
+	protected static boolean stringContainsCOVID19Info(String webPageDataContent) {
+	    return _keywordslist.stream().anyMatch(webPageDataContent::contains);
+		
+	   
+	}
+	protected static void assignKeywordsList(Collection<String> list) {
+		_keywordslist=list;
+	}
 }

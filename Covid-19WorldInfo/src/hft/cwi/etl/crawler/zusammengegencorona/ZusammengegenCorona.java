@@ -26,6 +26,7 @@ public class ZusammengegenCorona extends Crawler implements ICrawler {
 	public void startCrawling(Collection<String> keywordsToLookOutFor) {
 		System.out.println("start crawling in ZusammengegenCorona .....");
 		List<CrawlerSeed> theSeedList = new ArrayList<>();
+		assignKeywordsList(keywordsToLookOutFor);
 		theSeedList.add(0, new CrawlerSeed(_startURI, 1));
 		collectWebsiteLinksAndData(theSeedList);
 	}

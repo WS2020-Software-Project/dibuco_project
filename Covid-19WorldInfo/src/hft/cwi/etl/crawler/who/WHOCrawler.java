@@ -28,6 +28,7 @@ public class WHOCrawler extends Crawler implements ICrawler {
 		System.out.println("start crawling in WHO .....");
 		List<CrawlerSeed> theSeedList = new ArrayList<>();
 		theSeedList.add(0, new CrawlerSeed(_startURI, 1));
+		assignKeywordsList(keywordsToLookOutFor);
 		collectWebsiteLinksAndData(theSeedList);
 	}
 
