@@ -93,17 +93,16 @@ public class CSVHandlingUtil {
 			csvWriter.append("NO_KEYWORDS_FOUND");
 			csvWriter.append(",");
 		} else {
-			webpage.getAllKeywords().entrySet().forEach(entry -> {
-				try {
-					csvWriter.append(entry.getKey());
-					csvWriter.append(",");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			});
+			csvWriter.append(webpage.getAllKeywords().get(0));
+			csvWriter.append(",");
 		}
-		csvWriter.append(
-				urlConnection.getURL().getFile().substring(urlConnection.getURL().getFile().lastIndexOf("/") + 1));
+		String websiteTitle = 
+				urlConnection.getURL().getFile().substring(urlConnection.getURL().getFile().lastIndexOf("/") + 1);
+		if(websiteTitle.isEmpty()) {
+			csvWriter.append(UUID.randomUUID().toString());
+		} else {
+			csvWriter.append(websiteTitle);
+		}
 		csvWriter.append(",");
 		csvWriter.append(webpage.getWebpage().toString());
 		csvWriter.append(",");

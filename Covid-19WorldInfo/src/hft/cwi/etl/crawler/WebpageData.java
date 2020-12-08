@@ -5,13 +5,13 @@ import java.net.URI;
 import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 public class WebpageData {
 
-	private Map<String,Integer> _numberOfKeywords;
+	private List<String> _keywords;
 	private URI _webpage;
 	private InputStream _inputStream;
 	private String _contentAsText;
@@ -23,7 +23,7 @@ public class WebpageData {
 		_webpage = webpage;
 		_webPageDataContent = webPageDataContent;
 		_contentAsText = contentAsText;
-		_numberOfKeywords = new HashMap<>();
+		_keywords = new ArrayList<>();
 		_doctype = doctype;
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		Date date = new Date(urlConnection.getDate());
@@ -33,7 +33,7 @@ public class WebpageData {
 	public WebpageData(URI webpage, InputStream inputStream,String doctype, URLConnection urlConnection) {
 		_webpage = webpage;
 		_inputStream = inputStream;
-		_numberOfKeywords = new HashMap<>();
+		_keywords = new ArrayList<>();
 		_doctype = doctype;
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		Date date = new Date(urlConnection.getDate());
@@ -68,16 +68,17 @@ public class WebpageData {
 		return _doctype;
 	}
 	
-	public void addKeyword(String keyword, int amountOfAppearance) {
-		_numberOfKeywords.put(keyword, amountOfAppearance);
+	public void addKeyword(String keyword) {
+		_keywords.add(keyword);
 	}
 	
-	public void updateKeyword(String keyword, int amountOfAppearance) {
-		_numberOfKeywords.computeIfPresent(keyword, (k,v) -> v = amountOfAppearance);
+	
+	public List<String> getAllKeywords(){
+		return _keywords;
 	}
 	
-	public Map<String,Integer> getAllKeywords(){
-		return _numberOfKeywords;
+	public void addAllKeywords(List<String> list) {
+		_keywords.addAll(list);
 	}
 	
 }
