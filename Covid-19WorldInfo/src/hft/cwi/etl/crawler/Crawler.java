@@ -33,7 +33,7 @@ public abstract class Crawler {
 	protected static final String HTML = "html";
 	protected static final String PDF = "pdf";
 	
-	private static Collection<String> _keywordslist;
+	protected static Collection<String> _keywordslist;
 
 	
 
@@ -77,6 +77,7 @@ public abstract class Crawler {
 			websiteToVisit.addAll(collectWebsiteLinksAndData(aSeedList));
 			return websiteToVisit;
 		} catch (IOException e) {
+			e.printStackTrace();
 			if(aSeedList.isEmpty()) {
 				return websiteToVisit;
 			}
@@ -105,8 +106,14 @@ public abstract class Crawler {
 	}
 
 	private Document createDocumentWithUTF8Encoding(Response response) throws IOException {
-		String html = IOUtils.toString(response.url().openStream(), StandardCharsets.UTF_8);
+		if(response.url().toString().startsWith("https://www.rki"))
+		{
+			return Jsoup.parse(HTMLHandlingUtil.getHTMLContent(response.parse()));
+		}
+		else {
+			String html = IOUtils.toString(response.url().openStream(), StandardCharsets.UTF_8);
 		return Jsoup.parse(html,response.url().toString());
+		}
 	}
 
 	private void handleAndLogError(final List<CrawlerSeed> aSeedList, final Set<URI> websiteToVisit,
@@ -121,10 +128,11 @@ public abstract class Crawler {
 	@SuppressWarnings("resource")
 	private void handleAndSavePDFDataToDisk(final CrawlerSeed currSeed, Response response) throws IOException {
 ///////////////check keywords
-	if( _keywordslist.stream().anyMatch(response.url().openStream().toString()::contains)) {
-		WebpageData data = new WebpageData(currSeed.getUri() ,response.url().openStream(), PDF,response.url().openConnection());
-		saveFileOnDisk(data);
-	}
+		if (_keywordslist.stream().anyMatch(response.url().openStream().toString()::contains)) {
+			WebpageData data = new WebpageData(currSeed.getUri(), response.url().openStream(), PDF,
+					response.url().openConnection());
+			saveFileOnDisk(data);
+		}
 	}
 
 	private void handleAndSaveHTMLDataToDisk(final List<CrawlerSeed> aSeedList, final Set<URI> websiteToVisit,
@@ -138,9 +146,10 @@ public abstract class Crawler {
 		
 		_alreadyVisitedWebsite.addAll(websiteToVisit);
 		///////////////check keywords
-		if( _keywordslist.stream().anyMatch(HTMLHandlingUtil.getHTMLContent(document)::contains)) {
-		WebpageData data = new WebpageData(currSeed.getUri() ,HTMLHandlingUtil.getHTMLContent(document), HTMLHandlingUtil.getHTMLContentAsText(document), HTML,response.url().openConnection());
-		saveFileOnDisk(data);
+		if (_keywordslist.stream().anyMatch(HTMLHandlingUtil.getHTMLContent(document)::contains)) {
+			WebpageData data = new WebpageData(currSeed.getUri(), HTMLHandlingUtil.getHTMLContent(document),
+					HTMLHandlingUtil.getHTMLContentAsText(document), HTML, response.url().openConnection());
+			saveFileOnDisk(data);
 		}
 		if (isCrawlingDeepnessReached(nextCrawlingLevel)) {
 			aSeedList.addAll(websiteToVisit.stream().map(uri -> new CrawlerSeed(uri, nextCrawlingLevel))

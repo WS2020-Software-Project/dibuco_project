@@ -13,7 +13,7 @@ import hft.cwi.etl.crawler.ICrawler;
 public class ZusammengegenCorona extends Crawler implements ICrawler {
 
 	private static Collection<String> _forbiddenURI //
-			= CrawlerPropertiesFilesReader.getForbiddenURL("zusammengegensettings.properties");
+			= CrawlerPropertiesFilesReader.getForbiddenURL("zusuammengegensetting.properties");
 
 	private URI _startURI;
 
@@ -26,7 +26,7 @@ public class ZusammengegenCorona extends Crawler implements ICrawler {
 	public void startCrawling(Collection<String> keywordsToLookOutFor) {
 		System.out.println("start crawling in ZusammengegenCorona .....");
 		List<CrawlerSeed> theSeedList = new ArrayList<>();
-		assignKeywordsList(keywordsToLookOutFor);
+		_keywordslist = keywordsToLookOutFor;
 		theSeedList.add(0, new CrawlerSeed(_startURI, 1));
 		collectWebsiteLinksAndData(theSeedList);
 	}

@@ -18,7 +18,11 @@ import hft.cwi.etl.crawler.zusammengegencorona.ZusammengegenCorona;
 
 public class Main {
 
+	private static final String userDirectory=System.getProperty("user.dir");
+
 	public static void main(String[] args) {
+
+		System.out.println(userDirectory);
 
 		try (InputStream inputStream = new FileInputStream("resources/crawler.properties")) {
 			Properties properties = new Properties();
@@ -42,16 +46,16 @@ public class Main {
 			final Collection<String> _keywordslist = Arrays.asList(properties.getProperty("crawler.keywords").split(","));
 	
 			CrawlerController crawlerController = new CrawlerController(zusammengegenCrawler);
-			crawlerController.executeCrawler(_keywordslist);
+//			crawlerController.executeCrawler(_keywordslist);
 			
 //			crawlerController.changeCrawlerStrategy(ncdcCrawler);
-//			crawlerController.executeCrawler(null);
-//			
+//			crawlerController.executeCrawler(_keywordslist);
+////			
 //			crawlerController.changeCrawlerStrategy(whoCrawler);
-//			crawlerController.executeCrawler(null);
+//			crawlerController.executeCrawler(_keywordslist);
 //
-//			crawlerController.changeCrawlerStrategy(rkiCrawler);
-//			crawlerController.executeCrawler(null);
+			crawlerController.changeCrawlerStrategy(rkiCrawler);
+			crawlerController.executeCrawler(_keywordslist);
 
 		} catch (IOException e) {
 			e.printStackTrace();
