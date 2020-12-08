@@ -120,9 +120,12 @@ public abstract class Crawler {
 	}
 
 	private void handleAndSavePDFDataToDisk(final CrawlerSeed currSeed, Response response) throws IOException {
-		if (_keywordslist.stream().anyMatch(response.url().openStream().toString()::contains)) {
+		String urlConntent = IOUtils.toString(response.url().openStream(), StandardCharsets.UTF_8); 
+		if (_keywordslist.stream().anyMatch(urlConntent::contains)) {
+			List<String> allFoundedKeywords = _keywordslist.stream().filter(urlConntent::contains).collect(Collectors.toList());
 			WebpageData data = new WebpageData(currSeed.getUri(), response.url().openStream(), PDF,
 					response.url().openConnection());
+			data.addAllKeywords(allFoundedKeywords);
 			saveFileOnDisk(data);
 		}
 	}
@@ -138,6 +141,8 @@ public abstract class Crawler {
 		if (_keywordslist.stream().anyMatch(HTMLHandlingUtil.getHTMLContent(document)::contains)) {
 			WebpageData data = new WebpageData(currSeed.getUri(), HTMLHandlingUtil.getHTMLContent(document),
 					HTMLHandlingUtil.getHTMLContentAsText(document), HTML, response.url().openConnection());
+			List<String> allFoundedKeywords = _keywordslist.stream().filter(HTMLHandlingUtil.getHTMLContent(document)::contains).collect(Collectors.toList());
+			data.addAllKeywords(allFoundedKeywords);
 			saveFileOnDisk(data);
 		}
 		if (isCrawlingDeepnessReached(nextCrawlingLevel)) {
