@@ -10,15 +10,21 @@ import org.apache.pdfbox.text.PDFTextStripper;
 
 public class PDFHandlingUtil {
 
-	public static String getRawPDFData(InputStream inputStream) {
-		String text = "";
-		return getPDFFileContent(inputStream, text);
+	public static File createPDFFile(String prefix, InputStream inputStream) {
+		try {
+			File tempFile = createTemporaryFile(prefix);
+			FileUtils.copyInputStreamToFile(inputStream, tempFile);
+			inputStream.close();
+			return tempFile;
+		} catch (IOException e) {
+			return null;
+		}
 	}
 
-	private static String getPDFFileContent(InputStream inputStream, String text) {
+	public static String getPDFFileContent(File file) {
+		String text = "";
 		try {
-			File tempFile = createTemporaryFile();
-			PDDocument document = copyOnlinePDFContentIntoTempFile(inputStream, tempFile);
+			PDDocument document = PDDocument.load(file);
 			if (document.isEncrypted()) {
 				return text;
 			}
@@ -37,14 +43,8 @@ public class PDFHandlingUtil {
 		return text;
 	}
 
-	private static PDDocument copyOnlinePDFContentIntoTempFile(InputStream inputStream, File tempFile)
-			throws IOException {
-		FileUtils.copyInputStreamToFile(inputStream, tempFile);
-		return PDDocument.load(tempFile);
-	}
-
-	private static File createTemporaryFile() throws IOException {
-		File tempFile = File.createTempFile("downloadedFile", ".pdf");
+	private static File createTemporaryFile(String prefix) throws IOException {
+		File tempFile = new File(prefix);
 		tempFile.deleteOnExit();
 		return tempFile;
 	}

@@ -1,56 +1,174 @@
 package hft.cwi.etl.crawler;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toCollection;
-import java.util.TreeSet;
-
+import org.apache.commons.io.IOUtils;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import hft.cwi.etl.filehandling.CSVHandlingUtil;
 import hft.cwi.etl.filehandling.HTMLHandlingUtil;
-import hft.cwi.etl.filehandling.PDFHandlingUtil;
 import hft.cwi.etl.filehandling.XMLHandlingUtil;
 
 public abstract class Crawler {
 
-		// remove static 
 	private int _crawlingDeepness;
 
 	private int _timeBufferInMs;
-	///////
-	private int _maxChunkSize=3;
-	
-	protected static final String XML = "xml";
+
+	private static Set<URI> _alreadyVisitedWebsite = new HashSet<>();
+
+	private static Set<URI> _alreadyUsedSeed = new HashSet<>();
+
 	protected static final String HTML = "html";
 	protected static final String PDF = "pdf";
-	protected static final String OTHER = "other";
+
+	protected static Collection<String> _keywordslist;
 
 	public Crawler(int crawlingDeepness, int timeBufferInMs) {
 		_crawlingDeepness = crawlingDeepness;
 		_timeBufferInMs = timeBufferInMs;
 	}
+
+	protected void delayCrawler() {
+		try {
+			Thread.sleep(_timeBufferInMs);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	protected Set<URI> collectWebsiteLinksAndData(final List<CrawlerSeed> aSeedList) {
+		Set<URI> websiteToVisit = new HashSet<>();
+		if (aSeedList.isEmpty()) {
+			return websiteToVisit;
+		}
+		CrawlerSeed currSeed = aSeedList.get(0);
+		int nextCrawlingLevel = currSeed.getLevel() + 1;
+		aSeedList.remove(currSeed);
+		if (isSeedAlreadyUsed(currSeed)) {
+			websiteToVisit.addAll(collectWebsiteLinksAndData(aSeedList));
+			return websiteToVisit;
+		}
+		_alreadyUsedSeed.add(currSeed.getUri());
+		System.out.println(currSeed.getUri() + " " + currSeed.getLevel());
+		try {
+			delayCrawler();
+			Connection connection = Jsoup.connect(currSeed.getUri().toString()).maxBodySize(0);
+			connection.ignoreContentType(true);
+			Response response = connection.execute();
+			if (!isResponseCodeOK(response)) {
+				return websiteToVisit;
+			}
+			Document document = createDocumentWithUTF8Encoding(response);
+			collectWebsiteData(aSeedList, websiteToVisit, currSeed, nextCrawlingLevel, response, document);
+			websiteToVisit.addAll(collectWebsiteLinksAndData(aSeedList));
+			return websiteToVisit;
+		} catch (IOException e) {
+			e.printStackTrace();
+			if (aSeedList.isEmpty()) {
+				return websiteToVisit;
+			}
+			handleAndLogError(aSeedList, websiteToVisit, currSeed);
+			return websiteToVisit;
+		}
+	}
+
+	private boolean isResponseCodeOK(Response response) {
+		return response.statusCode() == 200;
+	}
+
+	private boolean isSeedAlreadyUsed(CrawlerSeed currSeed) {
+		return _alreadyUsedSeed.contains(currSeed.getUri());
+	}
+
+	private void collectWebsiteData(final List<CrawlerSeed> aSeedList, Set<URI> websiteToVisit, CrawlerSeed currSeed,
+			int nextCrawlingLevel, Response response, Document document) throws IOException {
+		if (isXMLFile(response)) {
+			handleAndCollectXMLData(aSeedList, websiteToVisit, nextCrawlingLevel, document);
+		} else if (isHTMLFile(response)) {
+			handleAndSaveHTMLDataToDisk(aSeedList, websiteToVisit, currSeed, nextCrawlingLevel, response, document);
+		} else if (isPDFFile(response)) {
+			handleAndSavePDFDataToDisk(currSeed, response);
+		}
+	}
+
+	private Document createDocumentWithUTF8Encoding(Response response) throws IOException {
+		if (response.url().toString().startsWith("https://www.rki")) {
+			return Jsoup.parse(HTMLHandlingUtil.getHTMLContent(response.parse()));
+		} else {
+			String html = IOUtils.toString(response.url().openStream(), StandardCharsets.UTF_8);
+			return Jsoup.parse(html, response.url().toString());
+		}
+	}
+
+	private void handleAndLogError(final List<CrawlerSeed> aSeedList, final Set<URI> websiteToVisit,
+			final CrawlerSeed currSeed) {
+		System.err.println("Couldn't establish connection to " + currSeed.getUri() + ". "
+				+ "This website will be skipped!" + "\n Error occured at line 238 in Crawler.java");
+		_alreadyVisitedWebsite.add(aSeedList.get(0).getUri());
+		websiteToVisit.addAll(collectWebsiteLinksAndData(aSeedList));
+	}
+
+	private void handleAndSavePDFDataToDisk(final CrawlerSeed currSeed, Response response) throws IOException {
+		String urlConntent = IOUtils.toString(response.url().openStream(), StandardCharsets.UTF_8); 
+		if (_keywordslist.stream().anyMatch(urlConntent::contains)) {
+			List<String> allFoundedKeywords = _keywordslist.stream().filter(urlConntent::contains).collect(Collectors.toList());
+			WebpageData data = new WebpageData(currSeed.getUri(), response.url().openStream(), PDF,
+					response.url().openConnection());
+			data.addAllKeywords(allFoundedKeywords);
+			saveFileOnDisk(data);
+		}
+	}
+
+	private void handleAndSaveHTMLDataToDisk(final List<CrawlerSeed> aSeedList, final Set<URI> websiteToVisit,
+			final CrawlerSeed currSeed, final int nextCrawlingLevel, Response response, Document document)
+			throws IOException {
+		websiteToVisit.addAll(HTMLHandlingUtil.getAllURLFromHTML(document).stream()
+				.filter(uri -> !isForbiddenLink(uri.toString())).filter(uri -> isSameWebpage(uri.toString()))
+				.filter(uri -> !_alreadyVisitedWebsite.contains(uri)).collect(Collectors.toSet()));
+
+		_alreadyVisitedWebsite.addAll(websiteToVisit);
+		if (_keywordslist.stream().anyMatch(HTMLHandlingUtil.getHTMLContent(document)::contains)) {
+			WebpageData data = new WebpageData(currSeed.getUri(), HTMLHandlingUtil.getHTMLContent(document),
+					HTMLHandlingUtil.getHTMLContentAsText(document), HTML, response.url().openConnection());
+			List<String> allFoundedKeywords = _keywordslist.stream().filter(HTMLHandlingUtil.getHTMLContent(document)::contains).collect(Collectors.toList());
+			data.addAllKeywords(allFoundedKeywords);
+			saveFileOnDisk(data);
+		}
+		if (isCrawlingDeepnessReached(nextCrawlingLevel)) {
+			aSeedList.addAll(websiteToVisit.stream().map(uri -> new CrawlerSeed(uri, nextCrawlingLevel))
+					.collect(Collectors.toList()));
+		}
+	}
+
+	private void handleAndCollectXMLData(final List<CrawlerSeed> aSeedList, final Set<URI> websiteToVisit,
+			final int nextCrawlingLevel, Document document) {
+		websiteToVisit.addAll(
+				XMLHandlingUtil.getAllURLFromXML(document).stream().filter(uri -> !isForbiddenLink(uri.toString()))
+						.filter(uri -> isSameWebpage(uri.toString())).collect(Collectors.toSet()));
+		if (isCrawlingDeepnessReached(nextCrawlingLevel)) {
+			aSeedList.addAll(websiteToVisit.stream().map(uri -> new CrawlerSeed(uri, nextCrawlingLevel))
+					.collect(Collectors.toList()));
+		}
+	}
+
+	private void saveFileOnDisk(WebpageData data) {
+		CSVHandlingUtil.writeCSVFile(data);
+	}
+
+	protected abstract boolean isForbiddenLink(String uriAsString);
+
+	protected abstract boolean isSameWebpage(String uriAsString);
 
 	protected boolean isXMLFile(Response connectionResponse) {
 		return connectionResponse.contentType().contains("text/xml")
@@ -70,183 +188,12 @@ public abstract class Crawler {
 		return deepness <= _crawlingDeepness;
 	}
 
-	protected void delayCrawler() {
-		try {
-			Thread.sleep(_timeBufferInMs);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
-	}
-	
-	protected void readRobotFile(String propertiesFileName) {
-		try (InputStream inputStream = new FileInputStream("resources/" + propertiesFileName)){
-			Properties properties = new Properties();
-			properties.load(inputStream);		
-			
-			String url = properties.getProperty("crawler.robot");
-			if(url.isEmpty()) {
-				return;
-			}
-			
-			try (BufferedReader in = new BufferedReader(new InputStreamReader(new URL( url).openStream()))){
-				String line = null;
-		        while((line = in.readLine()) != null) {
-		            System.out.println(line);
-		        }
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	
-	}
-	////////////////////NEWCode-> read links from file ////////////////////
-	protected void readURISFromFile() {
-		final  Set<URI> _URISFromFile = new HashSet<>();
-		String  uri;
-		int counter=1;
-		try (InputStream inFile = new FileInputStream("alllinksFile.txt")) {
-			BufferedReader br = new BufferedReader(new InputStreamReader(inFile));
-			 while ((uri = br.readLine()) != null) {
-				
-				if( counter<_maxChunkSize)
-				{ _URISFromFile.add(new URI(uri));
-					counter++;
-				}
-				else {
-					 _URISFromFile.add(new URI(uri));
-					System.out.println("\n collecting data .....\n  "+counter);
-					collectAllWebsitesData(_URISFromFile);
-					
-					counter=1;
-					_URISFromFile.clear();
-				}
-				 
-				 
-			 }
-			 
-			 System.out.println("\n collecting data .....\n  "+counter);
-				if(!_URISFromFile.isEmpty()) {
-					collectAllWebsitesData(_URISFromFile);
-					counter=0;
-					_URISFromFile.clear();
-				}
-				
-			 
-			 br.close();
-					
-			} catch (IOException | URISyntaxException e) {
-				e.printStackTrace();
-				
-			}
-				
-	}
-	/////////////
-	private void collectAllWebsitesData(Set<URI> allLinks) {
-		allLinks.stream().filter(Objects::nonNull).forEach(uri -> {
-			try {
-				Connection connection = Jsoup.connect(uri.toString()).maxBodySize(0);
-				connection.ignoreContentType(true);
-				Response response = connection.execute();
-				if (response.statusCode() != 200) {
-					return;
-				}
-				if (isXMLFile(response)) {
-					collectAllLinks(uri, "xml file, no content available", XML, response.url().openConnection());
-				} else if (isHTMLFile(response)) {
-					Document document = connection.get();
-					collectAllLinks(uri, HTMLHandlingUtil.getHTMLContent(document), HTML,
-							response.url().openConnection());
-				} else if (isPDFFile(response)) {
-					collectAllLinks(uri, PDFHandlingUtil.getRawPDFData(response.url().openStream()), PDF,
-							response.url().openConnection());
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		});
-	}
-	/////////
-	private static Collection<WebpageData> _allWebpages = new ArrayList<>();
-	
-/////////////////////////////////////////////////////////////////////////////////////////////
-	protected Set<URI> collectWebsiteURIs(final List<CrawlerSeed> aSeedList) {
-		final Set<URI> websiteToVisit = new HashSet<>();
-		try {
-			if (aSeedList.size() == 0)
-				return websiteToVisit;
-			final CrawlerSeed currSeed = aSeedList.get(0);
-			final int nextCrawlingLevel = currSeed.getLevel() + 1;
-			aSeedList.remove(currSeed);
+	protected static boolean stringContainsCOVID19Info(String webPageDataContent) {
+		return _keywordslist.stream().anyMatch(webPageDataContent::contains);
 
-			final Connection connection = Jsoup.connect(currSeed.getUri().toString()).maxBodySize(0);
-
-			connection.ignoreContentType(true);
-			Response response = connection.execute();
-			if (response.statusCode() != 200) {
-				return websiteToVisit;
-			}
-			Document document = connection.get();
-
-			if (isXMLFile(response)) {
-				websiteToVisit.addAll(XMLHandlingUtil.getAllURLFromXML(document).stream()
-						.filter(uri -> !isForbiddenLink(uri.toString()))
-						.filter(uri -> isSameWebpage(uri.toString()))
-						.collect(Collectors.toSet()));
-			
-				if (isCrawlingDeepnessReached(nextCrawlingLevel)) {
-					aSeedList.addAll(0, websiteToVisit.stream().map(uri -> new CrawlerSeed(uri, nextCrawlingLevel))
-							.collect(Collectors.toList()));
-				}				
-			} else if (isHTMLFile(response)) {
-				websiteToVisit.addAll(HTMLHandlingUtil.getAllURLFromHTML(document).stream()
-						.filter(uri -> !isForbiddenLink(uri.toString()))
-						.filter(uri -> isSameWebpage(uri.toString()))
-						.collect(Collectors.toSet()));
-			
-				if (isCrawlingDeepnessReached(nextCrawlingLevel)) {
-					aSeedList.addAll(0, websiteToVisit.stream().map(uri -> new CrawlerSeed(uri, nextCrawlingLevel))
-							.collect(Collectors.toList()));
-				}
-				
-			}
-									
-			websiteToVisit.addAll(collectWebsiteURIs(aSeedList));
-			
-			return websiteToVisit;
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-			return websiteToVisit;
-		}
 	}
-	
-	//write all links in the file 
-	protected void writeOnFile(final Set<URI>  websiteslist) {
-		try (FileWriter alllinksWriter = new FileWriter("alllinksFile.txt", true);) {
-			websiteslist.forEach(uri -> {
-				try {
-					alllinksWriter.append(uri.toString() + "\n");
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			});
-			alllinksWriter.flush();
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	protected static void assignKeywordsList(Collection<String> list) {
+		_keywordslist = list;
 	}
-	protected boolean isDuplicateLink(URI uriAsString,Set<URI> websiteToVisit) {
-
-		if(websiteToVisit.isEmpty())
-			return false;
-		return websiteToVisit.contains(uriAsString);
-	}
-	// added as abstract functions
-	protected abstract boolean isForbiddenLink(String uriAsString);
-	
-	protected abstract boolean isSameWebpage(String uriAsString);
-	
-	protected abstract void collectAllLinks(URI uri, String webPageContent, String docType, URLConnection urlConnection);
 }

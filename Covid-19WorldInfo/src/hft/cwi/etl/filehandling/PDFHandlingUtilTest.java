@@ -15,8 +15,7 @@ class PDFHandlingUtilTest {
 	@Test
 	void test() throws MalformedURLException, IOException{
 		File file = new File("testResources/denn, weil und deshalb.pdf");
-		InputStream targetStream = new FileInputStream((file));
-		assertEquals(PDFHandlingUtil.getRawPDFData(targetStream),"denn, weil und deshalb\r\n"
+		assertEquals(PDFHandlingUtil.getPDFFileContent(file),"denn, weil und deshalb\r\n"
 				+ "Wiederholung\r\n"
 				+ "weil -> Grund\r\n"
 				+ "denn -> Grund\r\n"

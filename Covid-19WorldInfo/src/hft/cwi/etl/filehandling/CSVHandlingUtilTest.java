@@ -16,16 +16,14 @@ class CSVHandlingUtilTest {
 
 	@Test
 	void test() throws IOException, URISyntaxException {
-		Collection<WebpageData> webpageData = new ArrayList<>();
 		URI webpage = new URI("https://www.google.com/");
 		String webPageDataContent = "empty content";
 		String doctype = "html";
 		URLConnection urlConnection	= webpage.toURL().openConnection();
 		
 		
-		WebpageData testobject = new WebpageData(webpage,webPageDataContent,doctype,urlConnection);
-		webpageData.add(testobject);
-		CSVHandlingUtil.writeCSVFile(webpageData, "csvFileTest");
+		WebpageData testobject = new WebpageData(webpage,webPageDataContent,doctype,"",urlConnection);
+		CSVHandlingUtil.writeCSVFile(testobject);
 		File testFile = new File("csvFileTest.csv");
 		
 		assert(testFile.exists());
