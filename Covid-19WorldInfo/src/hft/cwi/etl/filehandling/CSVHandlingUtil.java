@@ -15,6 +15,8 @@ import hft.cwi.etl.languagedetection.LangDetector;
 public class CSVHandlingUtil {
 	
 	private static final String PATH_TO_MIDDLEWARE_RESOURCE_FOLDER = "middlewareResources/";
+	
+	private static final String PATH_TO_MIDDLEWARE_RESOURCE_FOLDER_NAME = "middlewareResources";
 
 	private static final String CSV_FILE_NAME = "properties.csv";
 	
@@ -25,6 +27,10 @@ public class CSVHandlingUtil {
 	private static LangDetector _ld = new LangDetector("profiles");
 	
 	public static void writeCSVFile(WebpageData webpageData) {
+		File middlewareDirectory = new File(PATH_TO_MIDDLEWARE_RESOURCE_FOLDER_NAME);
+		if(!middlewareDirectory.exists()) {
+			middlewareDirectory.mkdir();
+		}
 		File file = new File(PATH_TO_MIDDLEWARE_RESOURCE_FOLDER + CSV_FILE_NAME);
 		if(!file.exists()) {
 			try (FileWriter csvWriter = new FileWriter(PATH_TO_MIDDLEWARE_RESOURCE_FOLDER + CSV_FILE_NAME)) {
@@ -84,8 +90,7 @@ public class CSVHandlingUtil {
 		csvWriter.append(file.getName());
 		csvWriter.append(",");
 		if (webpage.getAllKeywords().isEmpty()) {
-			csvWriter.append("NO_KEYWORDS_FOUND"
-					);
+			csvWriter.append("NO_KEYWORDS_FOUND");
 			csvWriter.append(",");
 		} else {
 			webpage.getAllKeywords().entrySet().forEach(entry -> {

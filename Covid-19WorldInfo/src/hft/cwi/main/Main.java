@@ -1,13 +1,11 @@
 package hft.cwi.main;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Properties;
 
 import hft.cwi.etl.crawler.CrawlerController;
@@ -18,13 +16,9 @@ import hft.cwi.etl.crawler.zusammengegencorona.ZusammengegenCorona;
 
 public class Main {
 
-	private static final String userDirectory=System.getProperty("user.dir");
-
 	public static void main(String[] args) {
 
-		System.out.println(userDirectory);
-
-		try (InputStream inputStream = new FileInputStream("resources/crawler.properties")) {
+		try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("crawler.properties")) {
 			Properties properties = new Properties();
 			properties.load(inputStream);
 
@@ -42,20 +36,19 @@ public class Main {
 			ZusammengegenCorona zusammengegenCrawler = new ZusammengegenCorona(zusammengegenStartURL, crawlingDeepness,
 					timeBufferInMS);
 			
-			////////////////////////
-			final Collection<String> _keywordslist = Arrays.asList(properties.getProperty("crawler.keywords").split(","));
+			Collection<String> keywordslist = Arrays.asList(properties.getProperty("crawler.keywords").split(","));
 	
 			CrawlerController crawlerController = new CrawlerController(zusammengegenCrawler);
-//			crawlerController.executeCrawler(_keywordslist);
+			crawlerController.executeCrawler(keywordslist);
 			
-//			crawlerController.changeCrawlerStrategy(ncdcCrawler);
-//			crawlerController.executeCrawler(_keywordslist);
-////			
-//			crawlerController.changeCrawlerStrategy(whoCrawler);
-//			crawlerController.executeCrawler(_keywordslist);
-//
+			crawlerController.changeCrawlerStrategy(ncdcCrawler);
+			crawlerController.executeCrawler(keywordslist);
+			
+			crawlerController.changeCrawlerStrategy(whoCrawler);
+			crawlerController.executeCrawler(keywordslist);
+
 			crawlerController.changeCrawlerStrategy(rkiCrawler);
-			crawlerController.executeCrawler(_keywordslist);
+			crawlerController.executeCrawler(keywordslist);
 
 		} catch (IOException e) {
 			e.printStackTrace();

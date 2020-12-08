@@ -3,7 +3,6 @@ package hft.cwi.etl.crawler;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -25,17 +24,15 @@ public abstract class Crawler {
 	private int _crawlingDeepness;
 
 	private int _timeBufferInMs;
-	
+
 	private static Set<URI> _alreadyVisitedWebsite = new HashSet<>();
-	
+
 	private static Set<URI> _alreadyUsedSeed = new HashSet<>();
-	
+
 	protected static final String HTML = "html";
 	protected static final String PDF = "pdf";
-	
-	protected static Collection<String> _keywordslist;
 
-	
+	protected static Collection<String> _keywordslist;
 
 	public Crawler(int crawlingDeepness, int timeBufferInMs) {
 		_crawlingDeepness = crawlingDeepness;
@@ -49,7 +46,7 @@ public abstract class Crawler {
 			Thread.currentThread().interrupt();
 		}
 	}
-	
+
 	protected Set<URI> collectWebsiteLinksAndData(final List<CrawlerSeed> aSeedList) {
 		Set<URI> websiteToVisit = new HashSet<>();
 		if (aSeedList.isEmpty()) {
@@ -58,11 +55,11 @@ public abstract class Crawler {
 		CrawlerSeed currSeed = aSeedList.get(0);
 		int nextCrawlingLevel = currSeed.getLevel() + 1;
 		aSeedList.remove(currSeed);
-		if(isSeedAlreadyUsed(currSeed)) {
+		if (isSeedAlreadyUsed(currSeed)) {
 			websiteToVisit.addAll(collectWebsiteLinksAndData(aSeedList));
 			return websiteToVisit;
 		}
-		_alreadyUsedSeed.add(currSeed.getUri());		
+		_alreadyUsedSeed.add(currSeed.getUri());
 		System.out.println(currSeed.getUri() + " " + currSeed.getLevel());
 		try {
 			delayCrawler();
@@ -78,7 +75,7 @@ public abstract class Crawler {
 			return websiteToVisit;
 		} catch (IOException e) {
 			e.printStackTrace();
-			if(aSeedList.isEmpty()) {
+			if (aSeedList.isEmpty()) {
 				return websiteToVisit;
 			}
 			handleAndLogError(aSeedList, websiteToVisit, currSeed);
@@ -97,7 +94,7 @@ public abstract class Crawler {
 	private void collectWebsiteData(final List<CrawlerSeed> aSeedList, Set<URI> websiteToVisit, CrawlerSeed currSeed,
 			int nextCrawlingLevel, Response response, Document document) throws IOException {
 		if (isXMLFile(response)) {
-			handleAndCollectXMLData(aSeedList, websiteToVisit, nextCrawlingLevel, document);				
+			handleAndCollectXMLData(aSeedList, websiteToVisit, nextCrawlingLevel, document);
 		} else if (isHTMLFile(response)) {
 			handleAndSaveHTMLDataToDisk(aSeedList, websiteToVisit, currSeed, nextCrawlingLevel, response, document);
 		} else if (isPDFFile(response)) {
@@ -106,28 +103,23 @@ public abstract class Crawler {
 	}
 
 	private Document createDocumentWithUTF8Encoding(Response response) throws IOException {
-		if(response.url().toString().startsWith("https://www.rki"))
-		{
+		if (response.url().toString().startsWith("https://www.rki")) {
 			return Jsoup.parse(HTMLHandlingUtil.getHTMLContent(response.parse()));
-		}
-		else {
+		} else {
 			String html = IOUtils.toString(response.url().openStream(), StandardCharsets.UTF_8);
-		return Jsoup.parse(html,response.url().toString());
+			return Jsoup.parse(html, response.url().toString());
 		}
 	}
 
 	private void handleAndLogError(final List<CrawlerSeed> aSeedList, final Set<URI> websiteToVisit,
 			final CrawlerSeed currSeed) {
 		System.err.println("Couldn't establish connection to " + currSeed.getUri() + ". "
-				+ "This website will be skipped!"
-				+ "\n Error occured at line 238 in Crawler.java");
-		_alreadyVisitedWebsite.add(aSeedList.get(0).getUri());	
+				+ "This website will be skipped!" + "\n Error occured at line 238 in Crawler.java");
+		_alreadyVisitedWebsite.add(aSeedList.get(0).getUri());
 		websiteToVisit.addAll(collectWebsiteLinksAndData(aSeedList));
 	}
 
-	@SuppressWarnings("resource")
 	private void handleAndSavePDFDataToDisk(final CrawlerSeed currSeed, Response response) throws IOException {
-///////////////check keywords
 		if (_keywordslist.stream().anyMatch(response.url().openStream().toString()::contains)) {
 			WebpageData data = new WebpageData(currSeed.getUri(), response.url().openStream(), PDF,
 					response.url().openConnection());
@@ -139,13 +131,10 @@ public abstract class Crawler {
 			final CrawlerSeed currSeed, final int nextCrawlingLevel, Response response, Document document)
 			throws IOException {
 		websiteToVisit.addAll(HTMLHandlingUtil.getAllURLFromHTML(document).stream()
-				.filter(uri -> !isForbiddenLink(uri.toString()))
-				.filter(uri -> isSameWebpage(uri.toString()))
-				.filter(uri -> !_alreadyVisitedWebsite.contains(uri))
-				.collect(Collectors.toSet()));
-		
+				.filter(uri -> !isForbiddenLink(uri.toString())).filter(uri -> isSameWebpage(uri.toString()))
+				.filter(uri -> !_alreadyVisitedWebsite.contains(uri)).collect(Collectors.toSet()));
+
 		_alreadyVisitedWebsite.addAll(websiteToVisit);
-		///////////////check keywords
 		if (_keywordslist.stream().anyMatch(HTMLHandlingUtil.getHTMLContent(document)::contains)) {
 			WebpageData data = new WebpageData(currSeed.getUri(), HTMLHandlingUtil.getHTMLContent(document),
 					HTMLHandlingUtil.getHTMLContentAsText(document), HTML, response.url().openConnection());
@@ -159,24 +148,23 @@ public abstract class Crawler {
 
 	private void handleAndCollectXMLData(final List<CrawlerSeed> aSeedList, final Set<URI> websiteToVisit,
 			final int nextCrawlingLevel, Document document) {
-		websiteToVisit.addAll(XMLHandlingUtil.getAllURLFromXML(document).stream()
-				.filter(uri -> !isForbiddenLink(uri.toString()))
-				.filter(uri -> isSameWebpage(uri.toString()))
-				.collect(Collectors.toSet()));
-		if (isCrawlingDeepnessReached(nextCrawlingLevel) ) {
+		websiteToVisit.addAll(
+				XMLHandlingUtil.getAllURLFromXML(document).stream().filter(uri -> !isForbiddenLink(uri.toString()))
+						.filter(uri -> isSameWebpage(uri.toString())).collect(Collectors.toSet()));
+		if (isCrawlingDeepnessReached(nextCrawlingLevel)) {
 			aSeedList.addAll(websiteToVisit.stream().map(uri -> new CrawlerSeed(uri, nextCrawlingLevel))
 					.collect(Collectors.toList()));
 		}
 	}
-	
-	private void saveFileOnDisk(WebpageData data){
+
+	private void saveFileOnDisk(WebpageData data) {
 		CSVHandlingUtil.writeCSVFile(data);
 	}
-	
+
 	protected abstract boolean isForbiddenLink(String uriAsString);
-	
+
 	protected abstract boolean isSameWebpage(String uriAsString);
-	
+
 	protected boolean isXMLFile(Response connectionResponse) {
 		return connectionResponse.contentType().contains("text/xml")
 				|| connectionResponse.contentType().contains(".xml");
@@ -194,13 +182,13 @@ public abstract class Crawler {
 	protected boolean isCrawlingDeepnessReached(int deepness) {
 		return deepness <= _crawlingDeepness;
 	}
-	
+
 	protected static boolean stringContainsCOVID19Info(String webPageDataContent) {
-	    return _keywordslist.stream().anyMatch(webPageDataContent::contains);
-		
-	   
+		return _keywordslist.stream().anyMatch(webPageDataContent::contains);
+
 	}
+
 	protected static void assignKeywordsList(Collection<String> list) {
-		_keywordslist=list;
+		_keywordslist = list;
 	}
 }
